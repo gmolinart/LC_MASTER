@@ -1,0 +1,2384 @@
+Index: menus/utilities/ImportAsset.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import bpy\r\nfrom cgl.plugins.blender import lumbermill as lm\r\nfrom cgl.plugins.blender import utils as utils\r\nimport os\r\n\r\n\r\ndef reorder_list(items, arg=''):\r\n    \"\"\"\r\n    Reorders list in order of importance, putting rig\r\n    :param items:\r\n    :return:\r\n    \"\"\"\r\n\r\n    if arg:\r\n\r\n        for i in items:\r\n            if i == arg:\r\n                items.remove(i)\r\n                items.insert(0, arg)\r\n\r\n    return items\r\n\r\n\r\ndef get_task(self, context):\r\n    scene = bpy.types.Scene.scene_enum\r\n\r\n    path_object = lm.LumberObject(get_asset_from_name(scene))\r\n    tasks = reorder_list(path_object.glob_project_element('task'), arg='rig')\r\n    value = [(tasks[i], tasks[i], '') for i in range(len(tasks))]\r\n\r\n    return (value)\r\n\r\n\r\ndef get_users(self, context):\r\n    scene = bpy.types.Scene.scene_enum\r\n    path_object = lm.LumberObject(get_asset_from_name(scene))\r\n\r\n    user_list = path_object.glob_project_element('user')\r\n    if not user_list:\r\n        path_object= path_object.copy(task = 'rig')\r\n        user_list = path_object.glob_project_element('user')\r\n    users = reorder_list(user_list, arg='publish')\r\n\r\n    value = [(users[i], users[i], '') for i in range(len(users))]\r\n\r\n    return (value)\r\n\r\ndef get_layout_libraries(data):\r\n    libraries = {}\r\n\r\n    for p in data:\r\n\r\n        print(p)\r\n        data_path = data[p]['source_path']\r\n\r\n        if data_path in libraries:\r\n            libraries[data_path].append(p)\r\n        else:\r\n            libraries[data_path] = [p]\r\n\r\n    return libraries\r\n\r\ndef read_layout(outFile=None, linked=True, append=False):\r\n    \"\"\"\r\n    Reads layout from json file\r\n    :param outFile: path to json file\r\n    :param linked:\r\n    :param append: if true the files are imported in the scene\r\n    :return:\r\n    \"\"\"\r\n    from cgl.plugins.blender.lumbermill import scene_object, LumberObject, import_file\r\n    from cgl.core.utils.read_write import load_json\r\n    import bpy\r\n\r\n    if outFile == None:\r\n        outFileObject = scene_object().copy(ext='json', task='lay', set_proper_filename=True).latest_version()\r\n        outFile = outFileObject.path_root\r\n    # outFile = scene_object().path_root.replace(scene_object().ext, 'json')\r\n\r\n    data = load_json(outFile)\r\n    libraries = get_layout_libraries(data)\r\n\r\n    print('________LIBRARIES___________')\r\n\r\n    for i in libraries:\r\n        pathToFile = os.path.join(scene_object().root, i)\r\n        lumberObject = LumberObject(pathToFile)\r\n\r\n        print(pathToFile)\r\n\r\n        if lumberObject.filename_base in bpy.data.libraries:\r\n            lib = bpy.data.libraries[lumberObject.filename]\r\n            bpy.data.batch_remove(ids=([lib]))\r\n            import_file(lumberObject.path_root, linked=False, append=True)\r\n        else:\r\n            import_file(lumberObject.path_root, linked=False, append=True)\r\n\r\n    for p in data:\r\n        print(p)\r\n        data_path = data[p]['source_path']\r\n        blender_transform = data[p]['blender_transform']\r\n\r\n        transform_data = []\r\n        for value in blender_transform:\r\n            transform_data.append(float(value))\r\n\r\n        pathToFile = os.path.join(scene_object().root, data_path)\r\n        lumberObject = LumberObject(pathToFile)\r\n        obj = bpy.data.objects.new(p, None)\r\n        bpy.context.collection.objects.link(obj)\r\n        obj.instance_type = 'COLLECTION'\r\n        if lumberObject.asset in bpy.data.collections:\r\n\r\n            obj.instance_collection = bpy.data.collections[lumberObject.asset]\r\n\r\n            location = (transform_data[0], transform_data[1], transform_data[2])\r\n            obj.location = location\r\n\r\n            rotation = (transform_data[3], transform_data[4], transform_data[5])\r\n            obj.rotation_euler = rotation\r\n\r\n            scale = (transform_data[6], transform_data[7], transform_data[8])\r\n            obj.scale = scale\r\n\r\n            if lumberObject.type in ['char', ]:\r\n                if append:\r\n                    print(\"___________creating proxy rig for {}____________\".format(lumberObject.asset))\r\n                    rig = '{}_rig'.format(lumberObject.asset)\r\n                    print(rig)\r\n                    objects = bpy.context.view_layer.objects\r\n                    bpy.context.view_layer.objects.active = objects[lumberObject.asset]\r\n                    bpy.ops.object.proxy_make(object=rig)\r\n\r\n        else:\r\n            print(\"__________________{} not found_____________\".format(lumberObject.path_root))\r\n\r\n\r\n\r\ndef get_version(self, context):\r\n    scene = bpy.types.Scene.scene_enum\r\n    path_object = lm.LumberObject(get_asset_from_name(scene))\r\n\r\n    versions = path_object.glob_project_element('version')\r\n    version = versions.reverse()\r\n    value = [(versions[i], versions[i], '') for i in range(len(versions))]\r\n    return (value)\r\n\r\n\r\nclass DialogUserB(bpy.types.Operator):\r\n    bl_idname = \"object.dialog_user_c\"\r\n    bl_label = \"Please select user, type and version\"\r\n\r\n    users: bpy.props.EnumProperty(items=get_users)\r\n    task: bpy.props.EnumProperty(items=get_task)\r\n    #version: bpy.props.EnumProperty(items=get_version)\r\n\r\n    def execute(self, context):\r\n        # my_users =  bpy.props.EnumProperty(items = split_string(self.my_string))\r\n\r\n        path_object = get_asset_from_name(bpy.types.Scene.scene_enum.replace('publish', self.users))\r\n        path_object = path_object.copy(task=self.task, set_proper_filename=True)\r\n        path_object = path_object.latest_version().copy(set_proper_filename=True)\r\n        render = path_object.copy(context='render')\r\n        if os.path.isfile(render.path_root):\r\n            path_object = render\r\n        open_file = path_object.path_root\r\n\r\n        message = 'selected {}'.format(open_file)\r\n        try :\r\n            bpy.ops.object.mode_set(mode='OBJECT')\r\n        except RuntimeError:\r\n            pass\r\n\r\n        if os.path.isfile((open_file)):\r\n\r\n            if  path_object.type == 'env':\r\n\r\n                lm.import_file(open_file)\r\n                if os.path.isfile(path_object.copy(ext='json').path_root):\r\n                    read_layout(outFile=path_object.copy(ext='json').path_root, append=True)\r\n                    bpy.ops.object.setup_collections()\r\n\r\n            else:\r\n                lm.import_file(open_file, snap_to_cursor=True)\r\n            name = path_object.asset\r\n\r\n            if path_object.type in ['char', ]:\r\n                rig = '{}_rig'.format(path_object.asset)\r\n                print(rig)\r\n                objects = bpy.context.view_layer.objects\r\n                objects.active = objects[name]\r\n                bpy.ops.object.proxy_make(object=rig)\r\n        else:\r\n            lm.confirm_prompt(message= 'This file doesnt exist, please check for sync or review for errors')\r\n\r\n        # if lm.scene_object().type is not 'env':\r\n        #     bpy.ops.object.setup_collections()\r\n\r\n        self.report({'INFO'}, message)\r\n\r\n        return {'FINISHED'}\r\n\r\n    def invoke(self, context, event):\r\n        wm = context.window_manager\r\n        return wm.invoke_props_dialog(self)\r\n\r\n\r\nbpy.utils.register_class(DialogUserB)\r\n\r\n\r\ndef get_items(self, context):\r\n    from cgl.plugins.blender import lumbermill as lm\r\n    import os\r\n\r\n    scene = lm.scene_object()\r\n    project = lm.LumberObject(scene.split_after('project'))\r\n    char = project.copy(scope='assets', seq='char')\r\n\r\n    assets = ['char', 'prop', 'lib', 'veh', 'env']\r\n    asset_dic = {}\r\n\r\n    for asset in assets:\r\n        asset_dic.update({asset: project.copy(scope='assets', seq=asset)})\r\n\r\n    list_base = []\r\n    list = []\r\n\r\n    for type in assets:\r\n\r\n        if os.path.isdir(asset_dic[type].path_root):\r\n            for i in os.listdir(asset_dic[type].path_root):\r\n                list_base.append('{} {}'.format(i, type))\r\n\r\n    dictionary = {}\r\n\r\n    for i in list_base:\r\n        list.append(i.split(' ')[0])\r\n\r\n    dictionary = dict(map(str, x.split(' ')) for x in list_base)\r\n\r\n    value = [('{} {}'.format(list[i], dictionary[list[i]]),\r\n              '{} {}'.format(dictionary[list[i]],\r\n                             '{}'.format(list[i])), '') for i in range(len(list))]\r\n    return (value)\r\n\r\n\r\ndef get_asset_from_name(keys=''):\r\n    name = keys.split(' ')[0]\r\n    type = keys.split(' ')[1]\r\n    user = keys.split(' ')[2]\r\n\r\n    task = 'mdl'\r\n\r\n    current_scene = lm.scene_object()\r\n    dict_ = {'company': current_scene.company,\r\n             'context': 'source',\r\n             'project': current_scene.project,\r\n             'scope': 'assets',\r\n             'seq': type,\r\n             'shot': name,\r\n             'task': task,\r\n             'user': user,\r\n             'resolution': 'high'\r\n             }\r\n\r\n    path_object = lm.LumberObject(dict_)\r\n    path_object.set_attr(filename='%s_%s_%s.%s' % (path_object.seq,\r\n                                                   path_object.shot,\r\n                                                   path_object.task,\r\n                                                   current_scene.ext\r\n                                                   ))\r\n    default_asset = path_object.latest_version()\r\n    return (default_asset)\r\n\r\n\r\nclass ImportAsset(bpy.types.Operator):\r\n    \"\"\"\r\n    This class is required to register a button in blender.\r\n    \"\"\"\r\n    bl_idname = 'object.import_asset'\r\n    bl_label = 'Import Asset'\r\n\r\n    bl_property = \"my_enum\"\r\n    my_enum = bpy.props.EnumProperty(items=get_items)\r\n\r\n    def execute(self, context):\r\n        self.report({'INFO'}, \"Selected: %s\" % self.my_enum)\r\n        bpy.types.Scene.scene_enum = bpy.props.StringProperty(name=self.my_enum)\r\n        bpy.types.Scene.scene_enum = self.my_enum + ' publish'\r\n        bpy.ops.object.dialog_user_c('INVOKE_DEFAULT')\r\n\r\n        # lm.open_file(get_asset_from_name(self.my_enum).path_root)\r\n        return {'FINISHED'}\r\n\r\n    def invoke(self, context, event):\r\n        wm = context.window_manager\r\n        wm.invoke_search_popup(self)\r\n        return {'FINISHED'}\r\n\r\n\r\ndef register():\r\n    bpy.utils.register_class(ImportAsset)\r\n\r\n\r\ndef unregister():\r\n    bpy.utils.unregister_class(ImportAsset)\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    register()\r\n    bpy.ops.object.import_asset('INVOKE_DEFAULT')
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/utilities/ImportAsset.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ menus/utilities/ImportAsset.py	(date 1607950724000)
+@@ -1,7 +1,7 @@
++import os
++
+ import bpy
+ from cgl.plugins.blender import lumbermill as lm
+-from cgl.plugins.blender import utils as utils
+-import os
+ 
+ 
+ def reorder_list(items, arg=''):
+@@ -45,95 +45,6 @@
+ 
+     return (value)
+ 
+-def get_layout_libraries(data):
+-    libraries = {}
+-
+-    for p in data:
+-
+-        print(p)
+-        data_path = data[p]['source_path']
+-
+-        if data_path in libraries:
+-            libraries[data_path].append(p)
+-        else:
+-            libraries[data_path] = [p]
+-
+-    return libraries
+-
+-def read_layout(outFile=None, linked=True, append=False):
+-    """
+-    Reads layout from json file
+-    :param outFile: path to json file
+-    :param linked:
+-    :param append: if true the files are imported in the scene
+-    :return:
+-    """
+-    from cgl.plugins.blender.lumbermill import scene_object, LumberObject, import_file
+-    from cgl.core.utils.read_write import load_json
+-    import bpy
+-
+-    if outFile == None:
+-        outFileObject = scene_object().copy(ext='json', task='lay', set_proper_filename=True).latest_version()
+-        outFile = outFileObject.path_root
+-    # outFile = scene_object().path_root.replace(scene_object().ext, 'json')
+-
+-    data = load_json(outFile)
+-    libraries = get_layout_libraries(data)
+-
+-    print('________LIBRARIES___________')
+-
+-    for i in libraries:
+-        pathToFile = os.path.join(scene_object().root, i)
+-        lumberObject = LumberObject(pathToFile)
+-
+-        print(pathToFile)
+-
+-        if lumberObject.filename_base in bpy.data.libraries:
+-            lib = bpy.data.libraries[lumberObject.filename]
+-            bpy.data.batch_remove(ids=([lib]))
+-            import_file(lumberObject.path_root, linked=False, append=True)
+-        else:
+-            import_file(lumberObject.path_root, linked=False, append=True)
+-
+-    for p in data:
+-        print(p)
+-        data_path = data[p]['source_path']
+-        blender_transform = data[p]['blender_transform']
+-
+-        transform_data = []
+-        for value in blender_transform:
+-            transform_data.append(float(value))
+-
+-        pathToFile = os.path.join(scene_object().root, data_path)
+-        lumberObject = LumberObject(pathToFile)
+-        obj = bpy.data.objects.new(p, None)
+-        bpy.context.collection.objects.link(obj)
+-        obj.instance_type = 'COLLECTION'
+-        if lumberObject.asset in bpy.data.collections:
+-
+-            obj.instance_collection = bpy.data.collections[lumberObject.asset]
+-
+-            location = (transform_data[0], transform_data[1], transform_data[2])
+-            obj.location = location
+-
+-            rotation = (transform_data[3], transform_data[4], transform_data[5])
+-            obj.rotation_euler = rotation
+-
+-            scale = (transform_data[6], transform_data[7], transform_data[8])
+-            obj.scale = scale
+-
+-            if lumberObject.type in ['char', ]:
+-                if append:
+-                    print("___________creating proxy rig for {}____________".format(lumberObject.asset))
+-                    rig = '{}_rig'.format(lumberObject.asset)
+-                    print(rig)
+-                    objects = bpy.context.view_layer.objects
+-                    bpy.context.view_layer.objects.active = objects[lumberObject.asset]
+-                    bpy.ops.object.proxy_make(object=rig)
+-
+-        else:
+-            print("__________________{} not found_____________".format(lumberObject.path_root))
+-
+ 
+ 
+ def get_version(self, context):
+@@ -172,16 +83,8 @@
+             pass
+ 
+         if os.path.isfile((open_file)):
+-
+-            if  path_object.type == 'env':
++            lm.reference_file(path_object.path_root, namespace=path_object.asset)
+ 
+-                lm.import_file(open_file)
+-                if os.path.isfile(path_object.copy(ext='json').path_root):
+-                    read_layout(outFile=path_object.copy(ext='json').path_root, append=True)
+-                    bpy.ops.object.setup_collections()
+-
+-            else:
+-                lm.import_file(open_file, snap_to_cursor=True)
+             name = path_object.asset
+ 
+             if path_object.type in ['char', ]:
+Index: preflights/mdl/CleanScene.py
+===================================================================
+--- preflights/mdl/CleanScene.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ preflights/mdl/CleanScene.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
+@@ -1,29 +0,0 @@
+-from cgl.plugins.preflight.preflight_check import PreflightCheck
+-# from cgl.plugins.blender import lumbermill as lm
+-# from cgl.plugins.blender import utils
+-import bpy
+-
+-
+-
+-
+-class CleanScene(PreflightCheck):
+-
+-    def getName(self):
+-        pass
+-
+-    def run(self):
+-        """
+-        script to be executed when the preflight is run.
+-
+-        If the preflight is successful:
+-        self.pass_check('Message about a passed Check')
+-
+-        if the preflight fails:
+-        self.fail_check('Message about a failed check')
+-        :return:
+-        """
+-        print('Cleanscene')
+-        bpy.ops.object.cleanup_scene()
+-
+-        self.pass_check('Check Passed')
+-        # self.fail_check('Check Failed')
+Index: preflights/mdl/CleanTurntable.py
+===================================================================
+--- preflights/mdl/CleanTurntable.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ preflights/mdl/CleanTurntable.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
+@@ -1,27 +0,0 @@
+-from cgl.plugins.preflight.preflight_check import PreflightCheck
+-from cgl.plugins.blender import lumbermill as lm
+-from cgl.plugins.blender import utils
+-import bpy
+-
+-class CleanTurntable(PreflightCheck):
+-
+-    def getName(self):
+-        pass
+-
+-    def run(self):
+-        """
+-        script to be executed when the preflight is run.
+-
+-        If the preflight is successful:
+-        self.pass_check('Message about a passed Check')
+-
+-        if the preflight fails:
+-        self.fail_check('Message about a failed check')
+-        :return:
+-        """
+-        print('Cleanturntable')
+-
+-        lm.clean_turntable()
+-        bpy.ops.object.delete_defaults()
+-        self.pass_check('Check Passed')
+-        # self.fail_check('Check Failed')
+Index: preflights/rig/Parentmeshtorig.py
+===================================================================
+--- preflights/rig/Parentmeshtorig.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ preflights/rig/Parentmeshtorig.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
+@@ -1,24 +0,0 @@
+-from cgl.plugins.preflight.preflight_check import PreflightCheck
+-# from cgl.plugins.blender import lumbermill as lm
+-# from cgl.plugins.blender import utils
+-
+-
+-class Parentmeshtorig(PreflightCheck):
+-
+-    def getName(self):
+-        pass
+-
+-    def run(self):
+-        """
+-        script to be executed when the preflight is run.
+-
+-        If the preflight is successful:
+-        self.pass_check('Message about a passed Check')
+-
+-        if the preflight fails:
+-        self.fail_check('Message about a failed check')
+-        :return:
+-        """
+-        print('Parentmeshtorig')
+-        self.pass_check('Check Passed')
+-        # self.fail_check('Check Failed')
+Index: preflights/mdl/CollectionName.py
+===================================================================
+--- preflights/mdl/CollectionName.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ preflights/mdl/CollectionName.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
+@@ -1,36 +0,0 @@
+-from cgl.plugins.preflight.preflight_check import PreflightCheck
+-from cgl.plugins.blender import lumbermill as lm
+-# from cgl.plugins.blender import utils
+-import bpy
+-
+-class CollectionName(PreflightCheck):
+-
+-    def getName(self):
+-        pass
+-
+-    def run(self):
+-        """
+-        script to be executed when the preflight is run.
+-
+-        If the preflight is successful:
+-        self.pass_check('Message about a passed Check')
+-
+-        if the preflight fails:
+-        self.fail_check('Message about a failed check')
+-        :return:
+-        """
+-        #bpy.ops.object.build()
+-        currentScene = lm.scene_object()
+-        assetName = lm.scene_object().shot
+-        collectionExists = False
+-        for collections in bpy.data.collections:
+-
+-            if assetName == collections.name:
+-                print('{} exists'.format(assetName))
+-                collectionExists = True
+-
+-        if collectionExists:
+-            self.pass_check('Check Passed')
+-
+-        else:
+-            self.fail_check('Couldnt find collection with Asset name')
+Index: menus.sync-conflict-20200811-171621-APUC2L3.cgl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus.sync-conflict-20200811-171621-APUC2L3.cgl	(date 1597180564000)
++++ menus.sync-conflict-20200811-171621-APUC2L3.cgl	(date 1597180564000)
+@@ -0,0 +1,277 @@
++{
++    "blender": {
++        "Animation": {
++            "CreateGreasePencil": {
++                "label": "CreateGreasePencil",
++                "module": "import cgl_tools.blender.menus.Animation.CreateGreasePencil as CreateGreasePencil; CreateGreasePencil.run()",
++                "name": "CreateGreasePencil",
++                "order": 2
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "import cgl_tools.blender.menus.Animation.Publish as Publish; Publish.run()",
++                "name": "Publish",
++                "order": 1
++            },
++            "order": 5
++        },
++        "Layout": {
++            "PublishCameras": {
++                "label": "PublishCameras",
++                "module": "import cgl_tools.blender.menus.Layout.PublishCameras as PublishCameras; PublishCameras.run()",
++                "name": "PublishCameras",
++                "order": 3
++            },
++            "ReadLayout": {
++                "label": "ReadLayout",
++                "module": "import cgl_tools.blender.menus.Layout.ReadLayout as ReadLayout; ReadLayout.run()",
++                "name": "ReadLayout",
++                "order": 1
++            },
++            "RenameCameras": {
++                "label": "RenameCameras",
++                "module": "import cgl_tools.blender.menus.Layout.RenameCameras as RenameCameras; RenameCameras.run()",
++                "name": "RenameCameras",
++                "order": 4
++            },
++            "WriteLayout": {
++                "label": "WriteLayout",
++                "module": "import cgl_tools.blender.menus.Layout.WriteLayout as WriteLayout; WriteLayout.run()",
++                "name": "WriteLayout",
++                "order": 2
++            },
++            "order": 2
++        },
++        "Modeling": {
++            "Checknormals": {
++                "label": "Checknormals",
++                "module": "import cgl_tools.blender.menus.Modeling.Checknormals as Checknormals; Checknormals.run()",
++                "name": "Checknormals",
++                "order": 1
++            },
++            "order": 3
++        },
++        "Rigging": {
++            "Checkshaders": {
++                "label": "Checkshaders",
++                "module": "import cgl_tools.blender.menus.Rigging.Checkshaders as Checkshaders; Checkshaders.run()",
++                "name": "Checkshaders",
++                "order": 4
++            },
++            "CleanupRig": {
++                "label": "CleanupRig",
++                "module": "import cgl_tools.blender.menus.Rigging.CleanupRig as CleanupRig; CleanupRig.run()",
++                "name": "CleanupRig",
++                "order": 5
++            },
++            "CorrectiveBlendShapes": {
++                "label": "CorrectiveBlendShapes",
++                "module": "import cgl_tools.blender.menus.Rigging.CorrectiveBlendShapes as CorrectiveBlendShapes; CorrectiveBlendShapes.run()",
++                "name": "CorrectiveBlendShapes",
++                "order": 10
++            },
++            "CreateHooks": {
++                "label": "CreateHooks",
++                "module": "import cgl_tools.blender.menus.Rigging.CreateHooks as CreateHooks; CreateHooks.run()",
++                "name": "CreateHooks",
++                "order": 7
++            },
++            "DefaultControllerShape": {
++                "label": "DefaultControllerShape",
++                "module": "import cgl_tools.blender.menus.Rigging.DefaultControllerShape as DefaultControllerShape; DefaultControllerShape.run()",
++                "name": "DefaultControllerShape",
++                "order": 15
++            },
++            "Fixrignames": {
++                "label": "Fixrignames",
++                "module": "import cgl_tools.blender.menus.Rigging.Fixrignames as Fixrignames; Fixrignames.run()",
++                "name": "Fixrignames",
++                "order": 2
++            },
++            "FourWayController": {
++                "label": "FourWayController",
++                "module": "import cgl_tools.blender.menus.Rigging.FourWayController as FourWayController; FourWayController.run()",
++                "name": "FourWayController",
++                "order": 16
++            },
++            "GetDefaultAction": {
++                "label": "GetDefaultAction",
++                "module": "import cgl_tools.blender.menus.Rigging.GetDefaultAction as GetDefaultAction; GetDefaultAction.run()",
++                "name": "GetDefaultAction",
++                "order": 12
++            },
++            "GetDefaultCamera": {
++                "label": "GetDefaultCamera",
++                "module": "import cgl_tools.blender.menus.Rigging.GetDefaultCamera as GetDefaultCamera; GetDefaultCamera.run()",
++                "name": "GetDefaultCamera",
++                "order": 13
++            },
++            "MirrorShapekey": {
++                "label": "MirrorShapekey",
++                "module": "import cgl_tools.blender.menus.Rigging.MirrorShapekey as MirrorShapekey; MirrorShapekey.run()",
++                "name": "MirrorShapekey",
++                "order": 14
++            },
++            "ParentMeshToRig": {
++                "label": "ParentMeshToRig",
++                "module": "import cgl_tools.blender.menus.Rigging.ParentMeshToRig as ParentMeshToRig; ParentMeshToRig.run()",
++                "name": "ParentMeshToRig",
++                "order": 3
++            },
++            "RemoveConstraints": {
++                "label": "RemoveConstraints",
++                "module": "import cgl_tools.blender.menus.Rigging.RemoveConstraints as RemoveConstraints; RemoveConstraints.run()",
++                "name": "RemoveConstraints",
++                "order": 8
++            },
++            "RemoveModifiers": {
++                "label": "RemoveModifiers",
++                "module": "import cgl_tools.blender.menus.Rigging.RemoveModifiers as RemoveModifiers; RemoveModifiers.run()",
++                "name": "RemoveModifiers",
++                "order": 9
++            },
++            "ResetArmature": {
++                "label": "ResetArmature",
++                "module": "import cgl_tools.blender.menus.Rigging.ResetArmature as ResetArmature; ResetArmature.run()",
++                "name": "ResetArmature",
++                "order": 6
++            },
++            "SetupRigTest": {
++                "label": "SetupRigTest",
++                "module": "import cgl_tools.blender.menus.Rigging.SetupRigTest as SetupRigTest; SetupRigTest.run()",
++                "name": "SetupRigTest",
++                "order": 11
++            },
++            "SimpleController": {
++                "label": "SimpleController",
++                "module": "import cgl_tools.blender.menus.Rigging.SimpleController as SimpleController; SimpleController.run()",
++                "name": "SimpleController",
++                "order": 1
++            },
++            "order": 4
++        },
++        "Shading": {
++            "DefaultShader": {
++                "label": "DefaultShader",
++                "module": "import cgl_tools.blender.menus.Shading.DefaultShader as DefaultShader; DefaultShader.run()",
++                "name": "DefaultShader",
++                "order": 1
++            },
++            "RenameMaterials": {
++                "label": "RenameMaterials",
++                "module": "import cgl_tools.blender.menus.Shading.RenameMaterials as RenameMaterials; RenameMaterials.run()",
++                "name": "RenameMaterials",
++                "order": 2
++            },
++            "SetupShaderColor": {
++                "label": "SetupShaderColor",
++                "module": "import cgl_tools.blender.menus.Shading.SetupShaderColor as SetupShaderColor; SetupShaderColor.run()",
++                "name": "SetupShaderColor",
++                "order": 3
++            },
++            "order": 6
++        },
++        "lumbermill": {
++            "Build": {
++                "label": "Build",
++                "module": "import cgl_tools.blender.menus.lumbermill.Build as Build; Build.run()",
++                "name": "Build",
++                "order": 3
++            },
++            "CleanupScene": {
++                "label": "CleanupScene",
++                "module": "import cgl_tools.blender.menus.lumbermill.CleanupScene as CleanupScene; CleanupScene.run()",
++                "name": "CleanupScene",
++                "order": 11
++            },
++            "DeleteDefaults": {
++                "label": "DeleteDefaults",
++                "module": "import cgl_tools.blender.menus.lumbermill.DeleteDefaults as DeleteDefaults; DeleteDefaults.run()",
++                "name": "DeleteDefaults",
++                "order": 12
++            },
++            "Launch": {
++                "label": "Launch",
++                "module": "import cgl_tools.blender.menus.lumbermill.Launch as Launch; Launch.run()",
++                "name": "Launch",
++                "order": 1
++            },
++            "PublishItem": {
++                "label": "PublishItem",
++                "module": "import cgl_tools.blender.menus.lumbermill.PublishItem as PublishItem; PublishItem.run()",
++                "name": "PublishItem",
++                "order": 2
++            },
++            "RenameObject": {
++                "label": "RenameObject",
++                "module": "import cgl_tools.blender.menus.lumbermill.RenameObject as RenameObject; RenameObject.run()",
++                "name": "RenameObject",
++                "order": 10
++            },
++            "Renamecollection": {
++                "label": "RenameCollection",
++                "module": "import cgl_tools.blender.menus.lumbermill.Renamecollection as Renamecollection; Renamecollection.run()",
++                "name": "Renamecollection",
++                "order": 7
++            },
++            "Render": {
++                "label": "Render",
++                "module": "import cgl_tools.blender.menus.lumbermill.Render as Render; Render.run()",
++                "name": "Render",
++                "order": 5
++            },
++            "Review": {
++                "label": "Review",
++                "module": "import cgl_tools.blender.menus.lumbermill.Review as Review; Review.run()",
++                "name": "Review",
++                "order": 6
++            },
++            "Turntable": {
++                "label": "Turntable",
++                "module": "import cgl_tools.blender.menus.lumbermill.Turntable as Turntable; Turntable.run()",
++                "name": "Turntable",
++                "order": 8
++            },
++            "VersionToLatest": {
++                "label": "VersionToLatest",
++                "module": "import cgl_tools.blender.menus.lumbermill.VersionToLatest as VersionToLatest; VersionToLatest.run()",
++                "name": "VersionToLatest",
++                "order": 9
++            },
++            "VersionUp": {
++                "label": "VersionUp",
++                "module": "import cgl_tools.blender.menus.lumbermill.VersionUp as VersionUp; VersionUp.run()",
++                "name": "VersionUp",
++                "order": 4
++            },
++            "order": 1
++        },
++        "utilities": {
++            "CorrectFileName": {
++                "label": "CorrectFileName",
++                "module": "import cgl_tools.blender.menus.utilities.CorrectFileName as CorrectFileName; CorrectFileName.run()",
++                "name": "CorrectFileName",
++                "order": 4
++            },
++            "ImportAsset": {
++                "label": "ImportAsset",
++                "module": "import cgl_tools.blender.menus.utilities.ImportAsset as ImportAsset; ImportAsset.run()",
++                "name": "ImportAsset",
++                "order": 2
++            },
++            "OpenItem": {
++                "label": "OpenItem",
++                "module": "import cgl_tools.blender.menus.utilities.OpenItem as OpenItem; OpenItem.run()",
++                "name": "OpenItem",
++                "order": 1
++            },
++            "SwitchUsers": {
++                "label": "SwitchUsers",
++                "module": "import cgl_tools.blender.menus.utilities.SwitchUsers as SwitchUsers; SwitchUsers.run()",
++                "name": "SwitchUsers",
++                "order": 3
++            },
++            "order": 7
++        }
++    }
++}
+\ No newline at end of file
+Index: menus.sync-conflict-20200811-122352-JVOR3BS.cgl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus.sync-conflict-20200811-122352-JVOR3BS.cgl	(date 1597091158000)
++++ menus.sync-conflict-20200811-122352-JVOR3BS.cgl	(date 1597091158000)
+@@ -0,0 +1,232 @@
++{
++    "blender": {
++        "Animation": {
++            "CreateGreasePencil": {
++                "label": "CreateGreasePencil",
++                "module": "import cgl_tools.blender.menus.Animation.CreateGreasePencil as CreateGreasePencil; CreateGreasePencil.run()",
++                "name": "CreateGreasePencil",
++                "order": 2
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "import cgl_tools.blender.menus.Animation.Publish as Publish; Publish.run()",
++                "name": "Publish",
++                "order": 1
++            },
++            "order": 5
++        },
++        "Layout": {
++            "PublishCameras": {
++                "label": "PublishCameras",
++                "module": "import cgl_tools.blender.menus.Layout.PublishCameras as PublishCameras; PublishCameras.run()",
++                "name": "PublishCameras",
++                "order": 3
++            },
++            "ReadLayout": {
++                "label": "ReadLayout",
++                "module": "import cgl_tools.blender.menus.Layout.ReadLayout as ReadLayout; ReadLayout.run()",
++                "name": "ReadLayout",
++                "order": 1
++            },
++            "RenameCameras": {
++                "label": "RenameCameras",
++                "module": "import cgl_tools.blender.menus.Layout.RenameCameras as RenameCameras; RenameCameras.run()",
++                "name": "RenameCameras",
++                "order": 4
++            },
++            "WriteLayout": {
++                "label": "WriteLayout",
++                "module": "import cgl_tools.blender.menus.Layout.WriteLayout as WriteLayout; WriteLayout.run()",
++                "name": "WriteLayout",
++                "order": 2
++            },
++            "order": 2
++        },
++        "Modeling": {
++            "Checknormals": {
++                "label": "Checknormals",
++                "module": "import cgl_tools.blender.menus.Modeling.Checknormals as Checknormals; Checknormals.run()",
++                "name": "Checknormals",
++                "order": 1
++            },
++            "order": 3
++        },
++        "Rigging": {
++            "Checkshaders": {
++                "label": "Checkshaders",
++                "module": "import cgl_tools.blender.menus.Rigging.Checkshaders as Checkshaders; Checkshaders.run()",
++                "name": "Checkshaders",
++                "order": 4
++            },
++            "CleanupRig": {
++                "label": "CleanupRig",
++                "module": "import cgl_tools.blender.menus.Rigging.CleanupRig as CleanupRig; CleanupRig.run()",
++                "name": "CleanupRig",
++                "order": 5
++            },
++            "CorrectiveBlendShapes": {
++                "label": "CorrectiveBlendShapes",
++                "module": "import cgl_tools.blender.menus.Rigging.CorrectiveBlendShapes as CorrectiveBlendShapes; CorrectiveBlendShapes.run()",
++                "name": "CorrectiveBlendShapes",
++                "order": 11
++            },
++            "CreateFourWayController": {
++                "label": "CreateFourWayController",
++                "module": "import cgl_tools.blender.menus.Rigging.CreateFourWayController as CreateFourWayController; CreateFourWayController.run()",
++                "name": "CreateFourWayController",
++                "order": 10
++            },
++            "CreateHooks": {
++                "label": "CreateHooks",
++                "module": "import cgl_tools.blender.menus.Rigging.CreateHooks as CreateHooks; CreateHooks.run()",
++                "name": "CreateHooks",
++                "order": 7
++            },
++            "Fixrignames": {
++                "label": "Fixrignames",
++                "module": "import cgl_tools.blender.menus.Rigging.Fixrignames as Fixrignames; Fixrignames.run()",
++                "name": "Fixrignames",
++                "order": 2
++            },
++            "GetDefaultAction": {
++                "label": "GetDefaultAction",
++                "module": "import cgl_tools.blender.menus.Rigging.GetDefaultAction as GetDefaultAction; GetDefaultAction.run()",
++                "name": "GetDefaultAction",
++                "order": 13
++            },
++            "GetDefaultCamera": {
++                "label": "GetDefaultCamera",
++                "module": "import cgl_tools.blender.menus.Rigging.GetDefaultCamera as GetDefaultCamera; GetDefaultCamera.run()",
++                "name": "GetDefaultCamera",
++                "order": 14
++            },
++            "ParentMeshToRig": {
++                "label": "ParentMeshToRig",
++                "module": "import cgl_tools.blender.menus.Rigging.ParentMeshToRig as ParentMeshToRig; ParentMeshToRig.run()",
++                "name": "ParentMeshToRig",
++                "order": 3
++            },
++            "RemoveConstraints": {
++                "label": "RemoveConstraints",
++                "module": "import cgl_tools.blender.menus.Rigging.RemoveConstraints as RemoveConstraints; RemoveConstraints.run()",
++                "name": "RemoveConstraints",
++                "order": 8
++            },
++            "RemoveModifiers": {
++                "label": "RemoveModifiers",
++                "module": "import cgl_tools.blender.menus.Rigging.RemoveModifiers as RemoveModifiers; RemoveModifiers.run()",
++                "name": "RemoveModifiers",
++                "order": 9
++            },
++            "ResetArmature": {
++                "label": "ResetArmature",
++                "module": "import cgl_tools.blender.menus.Rigging.ResetArmature as ResetArmature; ResetArmature.run()",
++                "name": "ResetArmature",
++                "order": 6
++            },
++            "SetupRigTest": {
++                "label": "SetupRigTest",
++                "module": "import cgl_tools.blender.menus.Rigging.SetupRigTest as SetupRigTest; SetupRigTest.run()",
++                "name": "SetupRigTest",
++                "order": 12
++            },
++            "SimpleController": {
++                "label": "SimpleController",
++                "module": "import cgl_tools.blender.menus.Rigging.SimpleController as SimpleController; SimpleController.run()",
++                "name": "SimpleController",
++                "order": 1
++            },
++            "order": 4
++        },
++        "Shading": {
++            "DefaultShader": {
++                "label": "DefaultShader",
++                "module": "import cgl_tools.blender.menus.Shading.DefaultShader as DefaultShader; DefaultShader.run()",
++                "name": "DefaultShader",
++                "order": 1
++            },
++            "RenameMaterials": {
++                "label": "RenameMaterials",
++                "module": "import cgl_tools.blender.menus.Shading.RenameMaterials as RenameMaterials; RenameMaterials.run()",
++                "name": "RenameMaterials",
++                "order": 2
++            },
++            "SetupShaderColor": {
++                "label": "SetupShaderColor",
++                "module": "import cgl_tools.blender.menus.Shading.SetupShaderColor as SetupShaderColor; SetupShaderColor.run()",
++                "name": "SetupShaderColor",
++                "order": 3
++            },
++            "order": 6
++        },
++        "lumbermill": {
++            "Build": {
++                "label": "Build",
++                "module": "import cgl_tools.blender.menus.lumbermill.Build as Build; Build.run()",
++                "name": "Build",
++                "order": 3
++            },
++            "CleanupScene": {
++                "label": "CleanupScene",
++                "module": "import cgl_tools.blender.menus.lumbermill.CleanupScene as CleanupScene; CleanupScene.run()",
++                "name": "CleanupScene",
++                "order": 11
++            },
++            "Launch": {
++                "label": "Launch",
++                "module": "import cgl_tools.blender.menus.lumbermill.Launch as Launch; Launch.run()",
++                "name": "Launch",
++                "order": 1
++            },
++            "PublishItem": {
++                "label": "PublishItem",
++                "module": "import cgl_tools.blender.menus.lumbermill.PublishItem as PublishItem; PublishItem.run()",
++                "name": "PublishItem",
++                "order": 2
++            },
++            "RenameObject": {
++                "label": "RenameObject",
++                "module": "import cgl_tools.blender.menus.lumbermill.RenameObject as RenameObject; RenameObject.run()",
++                "name": "RenameObject",
++                "order": 10
++            },
++            "Renamecollection": {
++                "label": "RenameCollection",
++                "module": "import cgl_tools.blender.menus.lumbermill.Renamecollection as Renamecollection; Renamecollection.run()",
++                "name": "Renamecollection",
++                "order": 7
++            },
++            "Render": {
++                "label": "Render",
++                "module": "import cgl_tools.blender.menus.lumbermill.Render as Render; Render.run()",
++                "name": "Render",
++                "order": 5
++            },
++            "Review": {
++                "label": "Review",
++                "module": "import cgl_tools.blender.menus.lumbermill.Review as Review; Review.run()",
++                "name": "Review",
++                "order": 6
++            },
++            "Turntable": {
++                "label": "Turntable",
++                "module": "import cgl_tools.blender.menus.lumbermill.Turntable as Turntable; Turntable.run()",
++                "name": "Turntable",
++                "order": 8
++            },
++            "VersionToLatest": {
++                "label": "VersionToLatest",
++                "module": "import cgl_tools.blender.menus.lumbermill.VersionToLatest as VersionToLatest; VersionToLatest.run()",
++                "name": "VersionToLatest",
++                "order": 9
++            },
++            "VersionUp": {
++                "label": "VersionUp",
++                "module": "import cgl_tools.blender.menus.lumbermill.VersionUp as VersionUp; VersionUp.run()",
++                "name": "VersionUp",
++                "order": 4
++            },
++            "order": 1
++        }
++    }
++}
+\ No newline at end of file
+Index: menus.cgl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n    \"blender\": [\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"Launch\",\r\n                    \"module\": \"import cgl_tools.blender.menus.lumbermill.Launch as Launch; Launch.run()\",\r\n                    \"name\": \"Launch\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"PublishItem\",\r\n                    \"module\": \"import cgl_tools.blender.menus.lumbermill.PublishItem as PublishItem; PublishItem.run()\",\r\n                    \"name\": \"PublishItem\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"Build\",\r\n                    \"module\": \"import cgl_tools.blender.menus.lumbermill.Build as Build; Build.run()\",\r\n                    \"name\": \"Build\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"VersionUp\",\r\n                    \"module\": \"import cgl_tools.blender.menus.lumbermill.VersionUp as VersionUp; VersionUp.run()\",\r\n                    \"name\": \"VersionUp\",\r\n                    \"order\": 4\r\n                },\r\n                {\r\n                    \"label\": \"Render\",\r\n                    \"module\": \"import cgl_tools.blender.menus.lumbermill.Render as Render; Render.run()\",\r\n                    \"name\": \"Render\",\r\n                    \"order\": 5\r\n                },\r\n                {\r\n                    \"label\": \"Review\",\r\n                    \"module\": \"import cgl_tools.blender.menus.lumbermill.Review as Review; Review.run()\",\r\n                    \"name\": \"Review\",\r\n                    \"order\": 6\r\n                },\r\n                {\r\n                    \"label\": \"Turntable\",\r\n                    \"module\": \"import cgl_tools.blender.menus.lumbermill.Turntable as Turntable; Turntable.run()\",\r\n                    \"name\": \"Turntable\",\r\n                    \"order\": 7\r\n                },\r\n                {\r\n                    \"label\": \"VersionToLatest\",\r\n                    \"module\": \"import cgl_tools.blender.menus.lumbermill.VersionToLatest as VersionToLatest; VersionToLatest.run()\",\r\n                    \"name\": \"VersionToLatest\",\r\n                    \"order\": 8\r\n                }\r\n            ],\r\n            \"name\": \"lumbermill\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"ReadLayout\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.ReadLayout as ReadLayout; ReadLayout.run()\",\r\n                    \"name\": \"ReadLayout\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"WriteLayout\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.WriteLayout as WriteLayout; WriteLayout.run()\",\r\n                    \"name\": \"WriteLayout\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"PublishCameras\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.PublishCameras as PublishCameras; PublishCameras.run()\",\r\n                    \"name\": \"PublishCameras\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"RenameCameras\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.RenameCameras as RenameCameras; RenameCameras.run()\",\r\n                    \"name\": \"RenameCameras\",\r\n                    \"order\": 4\r\n                },\r\n                {\r\n                    \"label\": \"SwitchSelectedResolution\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.SwitchSelectedResolution as SwitchSelectedResolution; SwitchSelectedResolution.run()\",\r\n                    \"name\": \"SwitchSelectedResolution\",\r\n                    \"order\": 5\r\n                },\r\n                {\r\n                    \"label\": \"SwitchSelectedUser\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.SwitchSelectedUser as SwitchSelectedUser; SwitchSelectedUser.run()\",\r\n                    \"name\": \"SwitchSelectedUser\",\r\n                    \"order\": 6\r\n                },\r\n                {\r\n                    \"label\": \"SwitchSelectedVersion\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.SwitchSelectedVersion as SwitchSelectedVersion; SwitchSelectedVersion.run()\",\r\n                    \"name\": \"SwitchSelectedVersion\",\r\n                    \"order\": 7\r\n                },\r\n                {\r\n                    \"label\": \"UnlinkAsset\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.UnlinkAsset as UnlinkAsset; UnlinkAsset.run()\",\r\n                    \"name\": \"UnlinkAsset\",\r\n                    \"order\": 8\r\n                },\r\n                {\r\n                    \"label\": \"ReadLayoutFromSelected\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Layout.ReadLayoutFromSelected as ReadLayoutFromSelected; ReadLayoutFromSelected.run()\",\r\n                    \"name\": \"ReadLayoutFromSelected\",\r\n                    \"order\": 9\r\n                }\r\n            ],\r\n            \"name\": \"Layout\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"Checknormals\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.Checknormals as Checknormals; Checknormals.run()\",\r\n                    \"name\": \"Checknormals\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"CreateLow\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.CreateLow as CreateLow; CreateLow.run()\",\r\n                    \"name\": \"CreateLow\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"PublishLow\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.PublishLow as PublishLow; PublishLow.run()\",\r\n                    \"name\": \"PublishLow\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"CenterReset\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.CenterReset as CenterReset; CenterReset.run()\",\r\n                    \"name\": \"CenterReset\",\r\n                    \"order\": 4\r\n                },\r\n                {\r\n                    \"label\": \"ExportToObj\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.ExportToObj as ExportToObj; ExportToObj.run()\",\r\n                    \"name\": \"ExportToObj\",\r\n                    \"order\": 5\r\n                },\r\n                {\r\n                    \"label\": \"WriteMeshList\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.WriteMeshList as WriteMeshList; WriteMeshList.run()\",\r\n                    \"name\": \"WriteMeshList\",\r\n                    \"order\": 6\r\n                },\r\n                {\r\n                    \"label\": \"UpdateResolutions\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.UpdateResolutions as UpdateResolutions; UpdateResolutions.run()\",\r\n                    \"name\": \"UpdateResolutions\",\r\n                    \"order\": 7\r\n                },\r\n                {\r\n                    \"label\": \"CopyLatestLow\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.CopyLatestLow as CopyLatestLow; CopyLatestLow.run()\",\r\n                    \"name\": \"CopyLatestLow\",\r\n                    \"order\": 8\r\n                },\r\n                {\r\n                    \"label\": \"FixMeshName\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.FixMeshName as FixMeshName; FixMeshName.run()\",\r\n                    \"name\": \"FixMeshName\",\r\n                    \"order\": 9\r\n                },\r\n                {\r\n                    \"label\": \"ImportBaseMesh\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Modeling.ImportBaseMesh as ImportBaseMesh; ImportBaseMesh.run()\",\r\n                    \"name\": \"ImportBaseMesh\",\r\n                    \"order\": 10\r\n                }\r\n            ],\r\n            \"name\": \"Modeling\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"SimpleController\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.SimpleController as SimpleController; SimpleController.run()\",\r\n                    \"name\": \"SimpleController\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"Fixrignames\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.Fixrignames as Fixrignames; Fixrignames.run()\",\r\n                    \"name\": \"Fixrignames\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"ParentMeshToRig\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.ParentMeshToRig as ParentMeshToRig; ParentMeshToRig.run()\",\r\n                    \"name\": \"ParentMeshToRig\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"Checkshaders\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.Checkshaders as Checkshaders; Checkshaders.run()\",\r\n                    \"name\": \"Checkshaders\",\r\n                    \"order\": 4\r\n                },\r\n                {\r\n                    \"label\": \"CleanupRig\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.CleanupRig as CleanupRig; CleanupRig.run()\",\r\n                    \"name\": \"CleanupRig\",\r\n                    \"order\": 5\r\n                },\r\n                {\r\n                    \"label\": \"ResetArmature\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.ResetArmature as ResetArmature; ResetArmature.run()\",\r\n                    \"name\": \"ResetArmature\",\r\n                    \"order\": 6\r\n                },\r\n                {\r\n                    \"label\": \"CreateHooks\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.CreateHooks as CreateHooks; CreateHooks.run()\",\r\n                    \"name\": \"CreateHooks\",\r\n                    \"order\": 7\r\n                },\r\n                {\r\n                    \"label\": \"RemoveConstraints\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.RemoveConstraints as RemoveConstraints; RemoveConstraints.run()\",\r\n                    \"name\": \"RemoveConstraints\",\r\n                    \"order\": 8\r\n                },\r\n                {\r\n                    \"label\": \"RemoveModifiers\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.RemoveModifiers as RemoveModifiers; RemoveModifiers.run()\",\r\n                    \"name\": \"RemoveModifiers\",\r\n                    \"order\": 9\r\n                },\r\n                {\r\n                    \"label\": \"CorrectiveBlendShapes\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.CorrectiveBlendShapes as CorrectiveBlendShapes; CorrectiveBlendShapes.run()\",\r\n                    \"name\": \"CorrectiveBlendShapes\",\r\n                    \"order\": 10\r\n                },\r\n                {\r\n                    \"label\": \"SetupRigTest\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.SetupRigTest as SetupRigTest; SetupRigTest.run()\",\r\n                    \"name\": \"SetupRigTest\",\r\n                    \"order\": 11\r\n                },\r\n                {\r\n                    \"label\": \"GetDefaultAction\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.GetDefaultAction as GetDefaultAction; GetDefaultAction.run()\",\r\n                    \"name\": \"GetDefaultAction\",\r\n                    \"order\": 12\r\n                },\r\n                {\r\n                    \"label\": \"GetDefaultCamera\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.GetDefaultCamera as GetDefaultCamera; GetDefaultCamera.run()\",\r\n                    \"name\": \"GetDefaultCamera\",\r\n                    \"order\": 13\r\n                },\r\n                {\r\n                    \"label\": \"AddControllers\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.AddControllers as AddControllers; AddControllers.run()\",\r\n                    \"name\": \"AddControllers\",\r\n                    \"order\": 14\r\n                },\r\n                {\r\n                    \"label\": \"SetColorFromParent\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.SetColorFromParent as SetColorFromParent; SetColorFromParent.run()\",\r\n                    \"name\": \"SetColorFromParent\",\r\n                    \"order\": 15\r\n                },\r\n                {\r\n                    \"label\": \"DefaultControllerShape\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.DefaultControllerShape as DefaultControllerShape; DefaultControllerShape.run()\",\r\n                    \"name\": \"DefaultControllerShape\",\r\n                    \"order\": 16\r\n                },\r\n                {\r\n                    \"label\": \"MeshToMdlTask\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.MeshToMdlTask as MeshToMdlTask; MeshToMdlTask.run()\",\r\n                    \"name\": \"MeshToMdlTask\",\r\n                    \"order\": 17\r\n                },\r\n                {\r\n                    \"label\": \"CleanupWeights\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.CleanupWeights as CleanupWeights; CleanupWeights.run()\",\r\n                    \"name\": \"CleanupWeights\",\r\n                    \"order\": 18\r\n                },\r\n                {\r\n                    \"label\": \"MirrorVertexGroups\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.MirrorVertexGroups as MirrorVertexGroups; MirrorVertexGroups.run()\",\r\n                    \"name\": \"MirrorVertexGroups\",\r\n                    \"order\": 19\r\n                },\r\n                {\r\n                    \"label\": \"RemoveMeshControllers\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.RemoveMeshControllers as RemoveMeshControllers; RemoveMeshControllers.run()\",\r\n                    \"name\": \"RemoveMeshControllers\",\r\n                    \"order\": 20\r\n                },\r\n                {\r\n                    \"label\": \"CopySkinWeights\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.CopySkinWeights as CopySkinWeights; CopySkinWeights.run()\",\r\n                    \"name\": \"CopySkinWeights\",\r\n                    \"order\": 21\r\n                },\r\n                {\r\n                    \"label\": \"RemoveDrivers\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Rigging.RemoveDrivers as RemoveDrivers; RemoveDrivers.run()\",\r\n                    \"name\": \"RemoveDrivers\",\r\n                    \"order\": 22\r\n                }\r\n            ],\r\n            \"name\": \"Rigging\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"Publish\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.Publish as Publish; Publish.run()\",\r\n                    \"name\": \"Publish\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"CreateGreasePencil\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.CreateGreasePencil as CreateGreasePencil; CreateGreasePencil.run()\",\r\n                    \"name\": \"CreateGreasePencil\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"CopyRelationship\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.CopyRelationship as CopyRelationship; CopyRelationship.run()\",\r\n                    \"name\": \"CopyRelationship\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"PasteRelationship\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.PasteRelationship as PasteRelationship; PasteRelationship.run()\",\r\n                    \"name\": \"PasteRelationship\",\r\n                    \"order\": 4\r\n                },\r\n                {\r\n                    \"label\": \"IkFkSwitch\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.IkFkSwitch as IkFkSwitch; IkFkSwitch.run()\",\r\n                    \"name\": \"IkFkSwitch\",\r\n                    \"order\": 5\r\n                },\r\n                {\r\n                    \"label\": \"SwitchProxy\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.SwitchProxy as SwitchProxy; SwitchProxy.run()\",\r\n                    \"name\": \"SwitchProxy\",\r\n                    \"order\": 6\r\n                },\r\n                {\r\n                    \"label\": \"SwitchRig\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.SwitchRig as SwitchRig; SwitchRig.run()\",\r\n                    \"name\": \"SwitchRig\",\r\n                    \"order\": 7\r\n                },\r\n                {\r\n                    \"label\": \"SwitchExtras\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.SwitchExtras as SwitchExtras; SwitchExtras.run()\",\r\n                    \"name\": \"SwitchExtras\",\r\n                    \"order\": 8\r\n                },\r\n                {\r\n                    \"label\": \"WriteAnimationData\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.WriteAnimationData as WriteAnimationData; WriteAnimationData.run()\",\r\n                    \"name\": \"WriteAnimationData\",\r\n                    \"order\": 9\r\n                },\r\n                {\r\n                    \"label\": \"RenderWithAudio\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.RenderWithAudio as RenderWithAudio; RenderWithAudio.run()\",\r\n                    \"name\": \"RenderWithAudio\",\r\n                    \"order\": 10\r\n                },\r\n                {\r\n                    \"label\": \"Publish\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.Publish as Publish; Publish.run()\",\r\n                    \"name\": \"Publish\",\r\n                    \"order\": 11\r\n                },\r\n                {\r\n                    \"label\": \"GreasePencilSwitch\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.GreasePencilSwitch as GreasePencilSwitch; GreasePencilSwitch.run()\",\r\n                    \"name\": \"GreasePencilSwitch\",\r\n                    \"order\": 12\r\n                },\r\n                {\r\n                    \"label\": \"GpMainLayers\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Animation.GpMainLayers as GpMainLayers; GpMainLayers.run()\",\r\n                    \"name\": \"GpMainLayers\",\r\n                    \"order\": 13\r\n                }\r\n            ],\r\n            \"name\": \"Animation\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"DefaultShader\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Shading.DefaultShader as DefaultShader; DefaultShader.run()\",\r\n                    \"name\": \"DefaultShader\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"RenameMaterials\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Shading.RenameMaterials as RenameMaterials; RenameMaterials.run()\",\r\n                    \"name\": \"RenameMaterials\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"SetupShaderColor\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Shading.SetupShaderColor as SetupShaderColor; SetupShaderColor.run()\",\r\n                    \"name\": \"SetupShaderColor\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"SaveMaterials\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Shading.SaveMaterials as SaveMaterials; SaveMaterials.run()\",\r\n                    \"name\": \"SaveMaterials\",\r\n                    \"order\": 4\r\n                },\r\n                {\r\n                    \"label\": \"LoadMaterials\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Shading.LoadMaterials as LoadMaterials; LoadMaterials.run()\",\r\n                    \"name\": \"LoadMaterials\",\r\n                    \"order\": 5\r\n                }\r\n            ],\r\n            \"name\": \"Shading\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"DefaultLightSetup\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Lighting.DefaultLightSetup as DefaultLightSetup; DefaultLightSetup.run()\",\r\n                    \"name\": \"DefaultLightSetup\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"ImportAllObjects\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Lighting.ImportAllObjects as ImportAllObjects; ImportAllObjects.run()\",\r\n                    \"name\": \"ImportAllObjects\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"SplitScene\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Lighting.SplitScene as SplitScene; SplitScene.run()\",\r\n                    \"name\": \"SplitScene\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"ImportRig\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Lighting.ImportRig as ImportRig; ImportRig.run()\",\r\n                    \"name\": \"ImportRig\",\r\n                    \"order\": 4\r\n                }\r\n            ],\r\n            \"name\": \"Lighting\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"ImportAsset\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.ImportAsset as ImportAsset; ImportAsset.run()\",\r\n                    \"name\": \"ImportAsset\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"CorrectFileName\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.CorrectFileName as CorrectFileName; CorrectFileName.run()\",\r\n                    \"name\": \"CorrectFileName\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"OpenAsset\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.OpenAsset as OpenAsset; OpenAsset.run()\",\r\n                    \"name\": \"OpenAsset\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"OpenShot\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.OpenShot as OpenShot; OpenShot.run()\",\r\n                    \"name\": \"OpenShot\",\r\n                    \"order\": 4\r\n                },\r\n                {\r\n                    \"label\": \"DeleteDefaults\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.DeleteDefaults as DeleteDefaults; DeleteDefaults.run()\",\r\n                    \"name\": \"DeleteDefaults\",\r\n                    \"order\": 5\r\n                },\r\n                {\r\n                    \"label\": \"ImportReferences\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.ImportReferences as ImportReferences; ImportReferences.run()\",\r\n                    \"name\": \"ImportReferences\",\r\n                    \"order\": 6\r\n                },\r\n                {\r\n                    \"label\": \"ImportAudio\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.ImportAudio as ImportAudio; ImportAudio.run()\",\r\n                    \"name\": \"ImportAudio\",\r\n                    \"order\": 7\r\n                },\r\n                {\r\n                    \"label\": \"DeleteTurntable\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.DeleteTurntable as DeleteTurntable; DeleteTurntable.run()\",\r\n                    \"name\": \"DeleteTurntable\",\r\n                    \"order\": 8\r\n                },\r\n                {\r\n                    \"label\": \"SetupCollections\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.SetupCollections as SetupCollections; SetupCollections.run()\",\r\n                    \"name\": \"SetupCollections\",\r\n                    \"order\": 9\r\n                },\r\n                {\r\n                    \"label\": \"FixCollectionName\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.FixCollectionName as FixCollectionName; FixCollectionName.run()\",\r\n                    \"name\": \"FixCollectionName\",\r\n                    \"order\": 10\r\n                },\r\n                {\r\n                    \"label\": \"RenameObject\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.RenameObject as RenameObject; RenameObject.run()\",\r\n                    \"name\": \"RenameObject\",\r\n                    \"order\": 11\r\n                },\r\n                {\r\n                    \"label\": \"CleanupScene\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.CleanupScene as CleanupScene; CleanupScene.run()\",\r\n                    \"name\": \"CleanupScene\",\r\n                    \"order\": 12\r\n                },\r\n                {\r\n                    \"label\": \"ShowInFolder\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.ShowInFolder as ShowInFolder; ShowInFolder.run()\",\r\n                    \"name\": \"ShowInFolder\",\r\n                    \"order\": 13\r\n                },\r\n                {\r\n                    \"label\": \"DeleteWorkspaces\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.DeleteWorkspaces as DeleteWorkspaces; DeleteWorkspaces.run()\",\r\n                    \"name\": \"DeleteWorkspaces\",\r\n                    \"order\": 14\r\n                },\r\n                {\r\n                    \"label\": \"SwitchUsers\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.SwitchUsers as SwitchUsers; SwitchUsers.run()\",\r\n                    \"name\": \"SwitchUsers\",\r\n                    \"order\": 15\r\n                },\r\n                {\r\n                    \"label\": \"SwitchTask\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.SwitchTask as SwitchTask; SwitchTask.run()\",\r\n                    \"name\": \"SwitchTask\",\r\n                    \"order\": 16\r\n                },\r\n                {\r\n                    \"label\": \"SwitchVersions\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.SwitchVersions as SwitchVersions; SwitchVersions.run()\",\r\n                    \"name\": \"SwitchVersions\",\r\n                    \"order\": 17\r\n                },\r\n                {\r\n                    \"label\": \"SwitchResolution\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.SwitchResolution as SwitchResolution; SwitchResolution.run()\",\r\n                    \"name\": \"SwitchResolution\",\r\n                    \"order\": 18\r\n                },\r\n                {\r\n                    \"label\": \"OpenSelected\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.OpenSelected as OpenSelected; OpenSelected.run()\",\r\n                    \"name\": \"OpenSelected\",\r\n                    \"order\": 19\r\n                },\r\n                {\r\n                    \"label\": \"CollectionToAsset\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.CollectionToAsset as CollectionToAsset; CollectionToAsset.run()\",\r\n                    \"name\": \"CollectionToAsset\",\r\n                    \"order\": 20\r\n                },\r\n                {\r\n                    \"label\": \"OpenDocumentation\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.OpenDocumentation as OpenDocumentation; OpenDocumentation.run()\",\r\n                    \"name\": \"OpenDocumentation\",\r\n                    \"order\": 21\r\n                },\r\n                {\r\n                    \"label\": \"SourceToRender\",\r\n                    \"module\": \"import cgl_tools.blender.menus.utilities.SourceToRender as SourceToRender; SourceToRender.run()\",\r\n                    \"name\": \"SourceToRender\",\r\n                    \"order\": 22\r\n                }\r\n            ],\r\n            \"name\": \"utilities\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"OpenSelected\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.OpenSelected as OpenSelected; OpenSelected.run()\",\r\n                    \"name\": \"OpenSelected\",\r\n                    \"order\": 1\r\n                },\r\n                {\r\n                    \"label\": \"OpenShot\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.OpenShot as OpenShot; OpenShot.run()\",\r\n                    \"name\": \"OpenShot\",\r\n                    \"order\": 2\r\n                },\r\n                {\r\n                    \"label\": \"OpenAsset\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.OpenAsset as OpenAsset; OpenAsset.run()\",\r\n                    \"name\": \"OpenAsset\",\r\n                    \"order\": 3\r\n                },\r\n                {\r\n                    \"label\": \"SwitchResolution\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.SwitchResolution as SwitchResolution; SwitchResolution.run()\",\r\n                    \"name\": \"SwitchResolution\",\r\n                    \"order\": 4\r\n                },\r\n                {\r\n                    \"label\": \"SwitchVersions\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.SwitchVersions as SwitchVersions; SwitchVersions.run()\",\r\n                    \"name\": \"SwitchVersions\",\r\n                    \"order\": 5\r\n                },\r\n                {\r\n                    \"label\": \"SwitchUsers\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.SwitchUsers as SwitchUsers; SwitchUsers.run()\",\r\n                    \"name\": \"SwitchUsers\",\r\n                    \"order\": 6\r\n                },\r\n                {\r\n                    \"label\": \"SwitchContext\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.SwitchContext as SwitchContext; SwitchContext.run()\",\r\n                    \"name\": \"SwitchContext\",\r\n                    \"order\": 7\r\n                },\r\n                {\r\n                    \"label\": \"SwitchTask\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.SwitchTask as SwitchTask; SwitchTask.run()\",\r\n                    \"name\": \"SwitchTask\",\r\n                    \"order\": 8\r\n                },\r\n                {\r\n                    \"label\": \"BackToPrevious\",\r\n                    \"module\": \"import cgl_tools.blender.menus.navigation.BackToPrevious as BackToPrevious; BackToPrevious.run()\",\r\n                    \"name\": \"BackToPrevious\",\r\n                    \"order\": 9\r\n                },\r\n                {\r\n                    \"label\": \"CopyToUser\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Navigation.CopyToUser as CopyToUser; CopyToUser.run()\",\r\n                    \"name\": \"CopyToUser\",\r\n                    \"order\": 10\r\n                },\r\n                {\r\n                    \"label\": \"CopyToTask\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Navigation.CopyToTask as CopyToTask; CopyToTask.run()\",\r\n                    \"name\": \"CopyToTask\",\r\n                    \"order\": 11\r\n                }\r\n            ],\r\n            \"name\": \"Navigation\"\r\n        },\r\n        {\r\n            \"buttons\": [\r\n                {\r\n                    \"label\": \"CreateInstance\",\r\n                    \"module\": \"import cgl_tools.blender.menus.Fx.CreateInstance as CreateInstance; CreateInstance.run()\",\r\n                    \"name\": \"CreateInstance\",\r\n                    \"order\": 1\r\n                }\r\n            ],\r\n            \"name\": \"Fx\"\r\n        }\r\n    ]\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus.cgl	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ menus.cgl	(date 1607968259040)
+@@ -306,10 +306,16 @@
+                     "order": 21
+                 },
+                 {
++                    "label": "Edgard",
++                    "module": "import cgl_tools.blender.menus.Rigging.Edgard as Edgard; Edgard.run()",
++                    "name": "Edgard",
++                    "order": 22
++                },
++                {
+                     "label": "RemoveDrivers",
+                     "module": "import cgl_tools.blender.menus.Rigging.RemoveDrivers as RemoveDrivers; RemoveDrivers.run()",
+                     "name": "RemoveDrivers",
+-                    "order": 22
++                    "order": 23
+                 }
+             ],
+             "name": "Rigging"
+@@ -594,6 +600,12 @@
+                     "module": "import cgl_tools.blender.menus.utilities.SourceToRender as SourceToRender; SourceToRender.run()",
+                     "name": "SourceToRender",
+                     "order": 22
++                },
++                {
++                    "label": "CopyToAnimProject",
++                    "module": "import cgl_tools.blender.menus.utilities.CopyToAnimProject as CopyToAnimProject; CopyToAnimProject.run()",
++                    "name": "CopyToAnimProject",
++                    "order": 23
+                 }
+             ],
+             "name": "utilities"
+Index: menus.sync-conflict-20200814-134736-APUC2L3.cgl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus.sync-conflict-20200814-134736-APUC2L3.cgl	(date 1597335452000)
++++ menus.sync-conflict-20200814-134736-APUC2L3.cgl	(date 1597335452000)
+@@ -0,0 +1,271 @@
++{
++    "blender": {
++        "Animation": {
++            "CreateGreasePencil": {
++                "label": "CreateGreasePencil",
++                "module": "import cgl_tools.blender.menus.Animation.CreateGreasePencil as CreateGreasePencil; CreateGreasePencil.run()",
++                "name": "CreateGreasePencil",
++                "order": 2
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "import cgl_tools.blender.menus.Animation.Publish as Publish; Publish.run()",
++                "name": "Publish",
++                "order": 1
++            },
++            "order": 5
++        },
++        "Layout": {
++            "PublishCameras": {
++                "label": "PublishCameras",
++                "module": "import cgl_tools.blender.menus.Layout.PublishCameras as PublishCameras; PublishCameras.run()",
++                "name": "PublishCameras",
++                "order": 3
++            },
++            "ReadLayout": {
++                "label": "ReadLayout",
++                "module": "import cgl_tools.blender.menus.Layout.ReadLayout as ReadLayout; ReadLayout.run()",
++                "name": "ReadLayout",
++                "order": 1
++            },
++            "RenameCameras": {
++                "label": "RenameCameras",
++                "module": "import cgl_tools.blender.menus.Layout.RenameCameras as RenameCameras; RenameCameras.run()",
++                "name": "RenameCameras",
++                "order": 4
++            },
++            "WriteLayout": {
++                "label": "WriteLayout",
++                "module": "import cgl_tools.blender.menus.Layout.WriteLayout as WriteLayout; WriteLayout.run()",
++                "name": "WriteLayout",
++                "order": 2
++            },
++            "order": 2
++        },
++        "Modeling": {
++            "Checknormals": {
++                "label": "Checknormals",
++                "module": "import cgl_tools.blender.menus.Modeling.Checknormals as Checknormals; Checknormals.run()",
++                "name": "Checknormals",
++                "order": 1
++            },
++            "order": 3
++        },
++        "Rigging": {
++            "AddControllers": {
++                "label": "AddControllers",
++                "module": "import cgl_tools.blender.menus.Rigging.AddControllers as AddControllers; AddControllers.run()",
++                "name": "AddControllers",
++                "order": 14
++            },
++            "Checkshaders": {
++                "label": "Checkshaders",
++                "module": "import cgl_tools.blender.menus.Rigging.Checkshaders as Checkshaders; Checkshaders.run()",
++                "name": "Checkshaders",
++                "order": 4
++            },
++            "CleanupRig": {
++                "label": "CleanupRig",
++                "module": "import cgl_tools.blender.menus.Rigging.CleanupRig as CleanupRig; CleanupRig.run()",
++                "name": "CleanupRig",
++                "order": 5
++            },
++            "CorrectiveBlendShapes": {
++                "label": "CorrectiveBlendShapes",
++                "module": "import cgl_tools.blender.menus.Rigging.CorrectiveBlendShapes as CorrectiveBlendShapes; CorrectiveBlendShapes.run()",
++                "name": "CorrectiveBlendShapes",
++                "order": 10
++            },
++            "CreateHooks": {
++                "label": "CreateHooks",
++                "module": "import cgl_tools.blender.menus.Rigging.CreateHooks as CreateHooks; CreateHooks.run()",
++                "name": "CreateHooks",
++                "order": 7
++            },
++            "Fixrignames": {
++                "label": "Fixrignames",
++                "module": "import cgl_tools.blender.menus.Rigging.Fixrignames as Fixrignames; Fixrignames.run()",
++                "name": "Fixrignames",
++                "order": 2
++            },
++            "GetDefaultAction": {
++                "label": "GetDefaultAction",
++                "module": "import cgl_tools.blender.menus.Rigging.GetDefaultAction as GetDefaultAction; GetDefaultAction.run()",
++                "name": "GetDefaultAction",
++                "order": 12
++            },
++            "GetDefaultCamera": {
++                "label": "GetDefaultCamera",
++                "module": "import cgl_tools.blender.menus.Rigging.GetDefaultCamera as GetDefaultCamera; GetDefaultCamera.run()",
++                "name": "GetDefaultCamera",
++                "order": 13
++            },
++            "ParentMeshToRig": {
++                "label": "ParentMeshToRig",
++                "module": "import cgl_tools.blender.menus.Rigging.ParentMeshToRig as ParentMeshToRig; ParentMeshToRig.run()",
++                "name": "ParentMeshToRig",
++                "order": 3
++            },
++            "RemoveConstraints": {
++                "label": "RemoveConstraints",
++                "module": "import cgl_tools.blender.menus.Rigging.RemoveConstraints as RemoveConstraints; RemoveConstraints.run()",
++                "name": "RemoveConstraints",
++                "order": 8
++            },
++            "RemoveModifiers": {
++                "label": "RemoveModifiers",
++                "module": "import cgl_tools.blender.menus.Rigging.RemoveModifiers as RemoveModifiers; RemoveModifiers.run()",
++                "name": "RemoveModifiers",
++                "order": 9
++            },
++            "ResetArmature": {
++                "label": "ResetArmature",
++                "module": "import cgl_tools.blender.menus.Rigging.ResetArmature as ResetArmature; ResetArmature.run()",
++                "name": "ResetArmature",
++                "order": 6
++            },
++            "SetupRigTest": {
++                "label": "SetupRigTest",
++                "module": "import cgl_tools.blender.menus.Rigging.SetupRigTest as SetupRigTest; SetupRigTest.run()",
++                "name": "SetupRigTest",
++                "order": 11
++            },
++            "SimpleController": {
++                "label": "SimpleController",
++                "module": "import cgl_tools.blender.menus.Rigging.SimpleController as SimpleController; SimpleController.run()",
++                "name": "SimpleController",
++                "order": 1
++            },
++            "order": 4
++        },
++        "Shading": {
++            "DefaultShader": {
++                "label": "DefaultShader",
++                "module": "import cgl_tools.blender.menus.Shading.DefaultShader as DefaultShader; DefaultShader.run()",
++                "name": "DefaultShader",
++                "order": 1
++            },
++            "RenameMaterials": {
++                "label": "RenameMaterials",
++                "module": "import cgl_tools.blender.menus.Shading.RenameMaterials as RenameMaterials; RenameMaterials.run()",
++                "name": "RenameMaterials",
++                "order": 2
++            },
++            "SetupShaderColor": {
++                "label": "SetupShaderColor",
++                "module": "import cgl_tools.blender.menus.Shading.SetupShaderColor as SetupShaderColor; SetupShaderColor.run()",
++                "name": "SetupShaderColor",
++                "order": 3
++            },
++            "order": 6
++        },
++        "lumbermill": {
++            "Build": {
++                "label": "Build",
++                "module": "import cgl_tools.blender.menus.lumbermill.Build as Build; Build.run()",
++                "name": "Build",
++                "order": 3
++            },
++            "CleanupScene": {
++                "label": "CleanupScene",
++                "module": "import cgl_tools.blender.menus.lumbermill.CleanupScene as CleanupScene; CleanupScene.run()",
++                "name": "CleanupScene",
++                "order": 11
++            },
++            "Launch": {
++                "label": "Launch",
++                "module": "import cgl_tools.blender.menus.lumbermill.Launch as Launch; Launch.run()",
++                "name": "Launch",
++                "order": 1
++            },
++            "PublishItem": {
++                "label": "PublishItem",
++                "module": "import cgl_tools.blender.menus.lumbermill.PublishItem as PublishItem; PublishItem.run()",
++                "name": "PublishItem",
++                "order": 2
++            },
++            "RenameObject": {
++                "label": "RenameObject",
++                "module": "import cgl_tools.blender.menus.lumbermill.RenameObject as RenameObject; RenameObject.run()",
++                "name": "RenameObject",
++                "order": 10
++            },
++            "Renamecollection": {
++                "label": "RenameCollection",
++                "module": "import cgl_tools.blender.menus.lumbermill.Renamecollection as Renamecollection; Renamecollection.run()",
++                "name": "Renamecollection",
++                "order": 7
++            },
++            "Render": {
++                "label": "Render",
++                "module": "import cgl_tools.blender.menus.lumbermill.Render as Render; Render.run()",
++                "name": "Render",
++                "order": 5
++            },
++            "Review": {
++                "label": "Review",
++                "module": "import cgl_tools.blender.menus.lumbermill.Review as Review; Review.run()",
++                "name": "Review",
++                "order": 6
++            },
++            "Turntable": {
++                "label": "Turntable",
++                "module": "import cgl_tools.blender.menus.lumbermill.Turntable as Turntable; Turntable.run()",
++                "name": "Turntable",
++                "order": 8
++            },
++            "VersionToLatest": {
++                "label": "VersionToLatest",
++                "module": "import cgl_tools.blender.menus.lumbermill.VersionToLatest as VersionToLatest; VersionToLatest.run()",
++                "name": "VersionToLatest",
++                "order": 9
++            },
++            "VersionUp": {
++                "label": "VersionUp",
++                "module": "import cgl_tools.blender.menus.lumbermill.VersionUp as VersionUp; VersionUp.run()",
++                "name": "VersionUp",
++                "order": 4
++            },
++            "order": 1
++        },
++        "utilities": {
++            "CorrectFileName": {
++                "label": "CorrectFileName",
++                "module": "import cgl_tools.blender.menus.utilities.CorrectFileName as CorrectFileName; CorrectFileName.run()",
++                "name": "CorrectFileName",
++                "order": 3
++            },
++            "DeleteDefaults": {
++                "label": "DeleteDefaults",
++                "module": "import cgl_tools.blender.menus.utilities.DeleteDefaults as DeleteDefaults; DeleteDefaults.run()",
++                "name": "DeleteDefaults",
++                "order": 6
++            },
++            "ImportAsset": {
++                "label": "ImportAsset",
++                "module": "import cgl_tools.blender.menus.utilities.ImportAsset as ImportAsset; ImportAsset.run()",
++                "name": "ImportAsset",
++                "order": 1
++            },
++            "OpenAsset": {
++                "label": "OpenAsset",
++                "module": "import cgl_tools.blender.menus.utilities.OpenAsset as OpenAsset; OpenAsset.run()",
++                "name": "OpenAsset",
++                "order": 4
++            },
++            "OpenShot": {
++                "label": "OpenShot",
++                "module": "import cgl_tools.blender.menus.utilities.OpenShot as OpenShot; OpenShot.run()",
++                "name": "OpenShot",
++                "order": 5
++            },
++            "SwitchUsers": {
++                "label": "SwitchUsers",
++                "module": "import cgl_tools.blender.menus.utilities.SwitchUsers as SwitchUsers; SwitchUsers.run()",
++                "name": "SwitchUsers",
++                "order": 2
++            },
++            "order": 7
++        }
++    }
++}
+\ No newline at end of file
+Index: menus/Modeling/ImportBaseMesh.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import bpy\r\n# from cgl.plugins.blender import lumbermill as lm\r\n\r\nclass ImportBaseMesh(bpy.types.Operator):\r\n    \"\"\"\r\n    Imports base mesh from the asset/lib/baseMesh/ latest publishe\r\n    \"\"\"\r\n    bl_idname = 'object.import_base_mesh'\r\n    bl_label = 'Import Base Mesh'\r\n\r\n    @classmethod\r\n    def poll(cls, context):\r\n        return context.active_object is not None\r\n\r\n    def execute(self, context):\r\n        run()\r\n        return {'FINISHED'}\r\n\r\n\r\ndef run():\r\n    \"\"\"\r\n    This run statement is what's executed when your button is pressed in blender.\r\n    :return:\r\n    \"\"\"\r\n    baseMesh = lm.scene_object().copy(asset='baseMesh', task='mdl', user='publish', latest=True,\r\n                                      set_proper_filename=True, type='lib')\r\n    print(baseMesh.path_root)\r\n\r\n    lm.import_file(baseMesh.path_root)\r\n\r\n    bpy.ops.object.make_local(type='ALL')\r\n\r\n    base_mesh = bpy.data.objects['baseMesh']\r\n    base_mesh.select_set(True)\r\n\r\n    bpy.ops.object.duplicates_make_real()\r\n\r\n    bpy.ops.object.select_all(action='DESELECT')\r\n    base_mesh.select_set(True)\r\n\r\n    bpy.ops.object.delete(use_global=False)\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/Modeling/ImportBaseMesh.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ menus/Modeling/ImportBaseMesh.py	(date 1606146124000)
+@@ -1,5 +1,5 @@
+ import bpy
+-# from cgl.plugins.blender import lumbermill as lm
++from cgl.plugins.blender import lumbermill as lm
+ 
+ class ImportBaseMesh(bpy.types.Operator):
+     """
+Index: menus/utilities/ImportTask.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import bpy\r\nimport os\r\nfrom cgl.plugins.blender import lumbermill as lm\r\n\r\n\r\ndef get_items(self, context):\r\n    from cgl.plugins.blender import lumbermill as lm\r\n\r\n    scene = lm.scene_object()\r\n\r\n    tasks = scene.glob_project_element('task')\r\n    tasks.append('Base Mesh')\r\n    print(tasks)\r\n\r\n    value = [(tasks[i], tasks[i], '') for i in range(len(tasks))]\r\n    # TODO - I'd like to have te task changed from short to long form\r\n    return (value)\r\n\r\n\r\nclass ImportTask(bpy.types.Operator):\r\n    \"\"\"\r\n    This class is required to register a button in blender.\r\n    \"\"\"\r\n    bl_idname = 'object.import_task'\r\n    bl_label = 'Import Task'\r\n    bl_property = \"selected_task\"\r\n    selected_task = bpy.props.EnumProperty(items=get_items)\r\n\r\n    def execute(self, context):\r\n        self.report({'INFO'}, \"Selected: %s\" % self.selected_task)\r\n\r\n        if self.selected_task == 'Base Mesh':\r\n            new_task = lm.scene_object().copy(context='render', task='mdl', type='lib', asset='baseMesh',\r\n                                              user='publish',\r\n                                              set_proper_filename=True).latest_version().path_root\r\n        else:\r\n\r\n            new_task = lm.scene_object().copy(context='render', task=self.selected_task, user='publish',\r\n                                              set_proper_filename=True).latest_version().path_root\r\n        if os.path.isfile(new_task):\r\n\r\n            print(new_task)\r\n            lm.import_file(new_task, linked=True, append=False)\r\n\r\n        else:\r\n            lm.confirm_prompt(\r\n                message='publish not found, please check if the task has been published or import manually  ')\r\n\r\n        return {'FINISHED'}\r\n\r\n    def invoke(self, context, event):\r\n        wm = context.window_manager\r\n        wm.invoke_search_popup(self)\r\n        return {'FINISHED'}\r\n\r\n\r\ndef run():\r\n    \"\"\"\r\n    This run statement is what's executed when your button is pressed in blender.\r\n    :return:\r\n    \"\"\"\r\n    print('Hello World!: button_template')\r\n\r\n\r\nif __name__ == '__main__':\r\n    bpy.utils.register_class(ImportTask)\r\n    bpy.ops.object.import_task('INVOKE_DEFAULT')
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/utilities/ImportTask.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ menus/utilities/ImportTask.py	(date 1607950724000)
+@@ -40,7 +40,7 @@
+         if os.path.isfile(new_task):
+ 
+             print(new_task)
+-            lm.import_file(new_task, linked=True, append=False)
++            lm.import_file_old(new_task, linked=True, append=False)
+ 
+         else:
+             lm.confirm_prompt(
+Index: menus.sync-conflict-20200805-192134-APUC2L3.cgl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus.sync-conflict-20200805-192134-APUC2L3.cgl	(date 1596628542000)
++++ menus.sync-conflict-20200805-192134-APUC2L3.cgl	(date 1596628542000)
+@@ -0,0 +1,172 @@
++{
++    "blender": {
++        "Animation": {
++            "Publish": {
++                "label": "Publish",
++                "module": "import cgl_tools.blender.menus.Animation.Publish as Publish; Publish.run()",
++                "name": "Publish",
++                "order": 1
++            },
++            "order": 5
++        },
++        "Layout": {
++            "PublishCameras": {
++                "label": "PublishCameras",
++                "module": "import cgl_tools.blender.menus.Layout.PublishCameras as PublishCameras; PublishCameras.run()",
++                "name": "PublishCameras",
++                "order": 3
++            },
++            "ReadLayout": {
++                "label": "ReadLayout",
++                "module": "import cgl_tools.blender.menus.Layout.ReadLayout as ReadLayout; ReadLayout.run()",
++                "name": "ReadLayout",
++                "order": 1
++            },
++            "RenameCameras": {
++                "label": "RenameCameras",
++                "module": "import cgl_tools.blender.menus.Layout.RenameCameras as RenameCameras; RenameCameras.run()",
++                "name": "RenameCameras",
++                "order": 4
++            },
++            "WriteLayout": {
++                "label": "WriteLayout",
++                "module": "import cgl_tools.blender.menus.Layout.WriteLayout as WriteLayout; WriteLayout.run()",
++                "name": "WriteLayout",
++                "order": 2
++            },
++            "order": 2
++        },
++        "Modeling": {
++            "Checknormals": {
++                "label": "Checknormals",
++                "module": "import cgl_tools.blender.menus.Modeling.Checknormals as Checknormals; Checknormals.run()",
++                "name": "Checknormals",
++                "order": 1
++            },
++            "order": 3
++        },
++        "Rigging": {
++            "Checkshaders": {
++                "label": "Checkshaders",
++                "module": "import cgl_tools.blender.menus.Rigging.Checkshaders as Checkshaders; Checkshaders.run()",
++                "name": "Checkshaders",
++                "order": 4
++            },
++            "CleanupRig": {
++                "label": "CleanupRig",
++                "module": "import cgl_tools.blender.menus.Rigging.CleanupRig as CleanupRig; CleanupRig.run()",
++                "name": "CleanupRig",
++                "order": 5
++            },
++            "Fixrignames": {
++                "label": "Fixrignames",
++                "module": "import cgl_tools.blender.menus.Rigging.Fixrignames as Fixrignames; Fixrignames.run()",
++                "name": "Fixrignames",
++                "order": 2
++            },
++            "ParentMeshToRig": {
++                "label": "ParentMeshToRig",
++                "module": "import cgl_tools.blender.menus.Rigging.ParentMeshToRig as ParentMeshToRig; ParentMeshToRig.run()",
++                "name": "ParentMeshToRig",
++                "order": 3
++            },
++            "ResetArmature": {
++                "label": "ResetArmature",
++                "module": "import cgl_tools.blender.menus.Rigging.ResetArmature as ResetArmature; ResetArmature.run()",
++                "name": "ResetArmature",
++                "order": 6
++            },
++            "SimpleController": {
++                "label": "SimpleController",
++                "module": "import cgl_tools.blender.menus.Rigging.SimpleController as SimpleController; SimpleController.run()",
++                "name": "SimpleController",
++                "order": 1
++            },
++            "order": 4
++        },
++        "Shading": {
++            "DefaultShader": {
++                "label": "DefaultShader",
++                "module": "import cgl_tools.blender.menus.Shading.DefaultShader as DefaultShader; DefaultShader.run()",
++                "name": "DefaultShader",
++                "order": 1
++            },
++            "RenameMaterials": {
++                "label": "RenameMaterials",
++                "module": "import cgl_tools.blender.menus.Shading.RenameMaterials as RenameMaterials; RenameMaterials.run()",
++                "name": "RenameMaterials",
++                "order": 2
++            },
++            "SetupShaderColor": {
++                "label": "SetupShaderColor",
++                "module": "import cgl_tools.blender.menus.Shading.SetupShaderColor as SetupShaderColor; SetupShaderColor.run()",
++                "name": "SetupShaderColor",
++                "order": 3
++            },
++            "order": 6
++        },
++        "lumbermill": {
++            "Build": {
++                "label": "Build",
++                "module": "import cgl_tools.blender.menus.lumbermill.Build as Build; Build.run()",
++                "name": "Build",
++                "order": 3
++            },
++            "Launch": {
++                "label": "Launch",
++                "module": "import cgl_tools.blender.menus.lumbermill.Launch as Launch; Launch.run()",
++                "name": "Launch",
++                "order": 1
++            },
++            "PublishItem": {
++                "label": "PublishItem",
++                "module": "import cgl_tools.blender.menus.lumbermill.PublishItem as PublishItem; PublishItem.run()",
++                "name": "PublishItem",
++                "order": 2
++            },
++            "RenameObject": {
++                "label": "RenameObject",
++                "module": "import cgl_tools.blender.menus.lumbermill.RenameObject as RenameObject; RenameObject.run()",
++                "name": "RenameObject",
++                "order": 10
++            },
++            "Renamecollection": {
++                "label": "RenameCollection",
++                "module": "import cgl_tools.blender.menus.lumbermill.Renamecollection as Renamecollection; Renamecollection.run()",
++                "name": "Renamecollection",
++                "order": 7
++            },
++            "Render": {
++                "label": "Render",
++                "module": "import cgl_tools.blender.menus.lumbermill.Render as Render; Render.run()",
++                "name": "Render",
++                "order": 5
++            },
++            "Review": {
++                "label": "Review",
++                "module": "import cgl_tools.blender.menus.lumbermill.Review as Review; Review.run()",
++                "name": "Review",
++                "order": 6
++            },
++            "Turntable": {
++                "label": "Turntable",
++                "module": "import cgl_tools.blender.menus.lumbermill.Turntable as Turntable; Turntable.run()",
++                "name": "Turntable",
++                "order": 8
++            },
++            "VersionToLatest": {
++                "label": "VersionToLatest",
++                "module": "import cgl_tools.blender.menus.lumbermill.VersionToLatest as VersionToLatest; VersionToLatest.run()",
++                "name": "VersionToLatest",
++                "order": 9
++            },
++            "VersionUp": {
++                "label": "VersionUp",
++                "module": "import cgl_tools.blender.menus.lumbermill.VersionUp as VersionUp; VersionUp.run()",
++                "name": "VersionUp",
++                "order": 4
++            },
++            "order": 1
++        }
++    }
++}
+\ No newline at end of file
+Index: menus/Rigging/SetupRigTest.sync-conflict-20200811-122353-JVOR3BS.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/Rigging/SetupRigTest.sync-conflict-20200811-122353-JVOR3BS.py	(date 1596928318000)
++++ menus/Rigging/SetupRigTest.sync-conflict-20200811-122353-JVOR3BS.py	(date 1596928318000)
+@@ -0,0 +1,30 @@
++import bpy
++# from cgl.plugins.blender import lumbermill as lm
++
++
++class SetupRigTest(bpy.types.Operator):
++    """
++    This class is required to register a button in blender.
++    """
++    bl_idname = 'object.setup_rig_test'
++    bl_label = 'SetupRigTest'
++
++    # @classmethod
++    # def poll(cls, context):
++    #     return context.active_object is not None
++
++    def execute(self, context):
++        run()
++        return {'FINISHED'}
++
++
++def run():
++    """
++    This run statement is what's executed when your button is pressed in blender.
++    :return:
++    """
++    bpy.ops.object.get_default_action()
++    bpy.ops.object.get_default_camera()
++
++    print('Hello World!: button_template')
++
+Index: preflights.sync-conflict-20200804-134156-APUC2L3.cgl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- preflights.sync-conflict-20200804-134156-APUC2L3.cgl	(date 1596510732000)
++++ preflights.sync-conflict-20200804-134156-APUC2L3.cgl	(date 1596510732000)
+@@ -0,0 +1,156 @@
++{
++    "blender": {
++        "anim": {
++            "CheckActionName": {
++                "label": "CheckActionName",
++                "module": "cgl_tools.blender.preflights.anim.CheckActionName",
++                "name": "CheckActionName",
++                "order": 1,
++                "required": "True"
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "cgl_tools.blender.preflights.anim.Publish",
++                "name": "Publish",
++                "order": 2,
++                "required": "True"
++            },
++            "order": 4
++        },
++        "default": {
++            "Publish": {
++                "label": "Publish",
++                "module": "cgl_tools.blender.preflights.default.Publish",
++                "name": "Publish",
++                "order": 1,
++                "required": "True"
++            },
++            "order": 2
++        },
++        "mdl": {
++            "Checknormals": {
++                "label": "Checknormals",
++                "module": "cgl_tools.blender.preflights.mdl.Checknormals",
++                "name": "Checknormals",
++                "order": 4,
++                "required": "True"
++            },
++            "Cleanturntable": {
++                "label": "Cleanturntable",
++                "module": "cgl_tools.blender.preflights.mdl.Cleanturntable",
++                "name": "Cleanturntable",
++                "order": 3,
++                "required": "True"
++            },
++            "Collectionname": {
++                "label": "Collectionname",
++                "module": "cgl_tools.blender.preflights.mdl.Collectionname",
++                "name": "Collectionname",
++                "order": 2,
++                "required": "True"
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "cgl_tools.blender.preflights.mdl.Publish",
++                "name": "Publish",
++                "order": 6,
++                "required": "True"
++            },
++            "Resettransformations": {
++                "label": "Resettransformations",
++                "module": "cgl_tools.blender.preflights.mdl.Resettransformations",
++                "name": "Resettransformations",
++                "order": 5,
++                "required": "True"
++            },
++            "TestSpaceName": {
++                "label": "TestSpaceName",
++                "module": "cgl_tools.blender.preflights.mdl.TestSpaceName",
++                "name": "TestSpaceName",
++                "order": 7,
++                "required": "True"
++            },
++            "TestSpaceNameB": {
++                "label": "TestSpaceNameB",
++                "module": "cgl_tools.blender.preflights.mdl.TestSpaceNameB",
++                "name": "TestSpaceNameB",
++                "order": 8,
++                "required": "True"
++            },
++            "TestSpaceNameH": {
++                "label": "TestSpaceNameH",
++                "module": "cgl_tools.blender.preflights.mdl.TestSpaceNameH",
++                "name": "TestSpaceNameH",
++                "order": 9,
++                "required": "True"
++            },
++            "Viewportcolors": {
++                "label": "Viewportcolors",
++                "module": "cgl_tools.blender.preflights.mdl.Viewportcolors",
++                "name": "Viewportcolors",
++                "order": 1,
++                "required": "True"
++            },
++            "order": 1
++        },
++        "rig": {
++            "Checkrigname": {
++                "label": "Checkrigname",
++                "module": "cgl_tools.blender.preflights.rig.Checkrigname",
++                "name": "Checkrigname",
++                "order": 3,
++                "required": "True"
++            },
++            "Checkshaders": {
++                "label": "Checkshaders",
++                "module": "cgl_tools.blender.preflights.rig.Checkshaders",
++                "name": "Checkshaders",
++                "order": 5,
++                "required": "True"
++            },
++            "Cleanrigscene": {
++                "label": "Cleanrigscene",
++                "module": "cgl_tools.blender.preflights.rig.Cleanrigscene",
++                "name": "Cleanrigscene",
++                "order": 7,
++                "required": "True"
++            },
++            "Parentmeshtorig": {
++                "label": "Parentmeshtorig",
++                "module": "cgl_tools.blender.preflights.rig.Parentmeshtorig",
++                "name": "Parentmeshtorig",
++                "order": 4,
++                "required": "True"
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "cgl_tools.blender.preflights.rig.Publish",
++                "name": "Publish",
++                "order": 8,
++                "required": "True"
++            },
++            "Removeactions": {
++                "label": "Removeactions",
++                "module": "cgl_tools.blender.preflights.rig.Removeactions",
++                "name": "Removeactions",
++                "order": 2,
++                "required": "True"
++            },
++            "Resetbones": {
++                "label": "Resetbones",
++                "module": "cgl_tools.blender.preflights.rig.Resetbones",
++                "name": "Resetbones",
++                "order": 6,
++                "required": "True"
++            },
++            "Savecurrentscene": {
++                "label": "Savecurrentscene",
++                "module": "cgl_tools.blender.preflights.rig.Savecurrentscene",
++                "name": "Savecurrentscene",
++                "order": 1,
++                "required": "True"
++            },
++            "order": 3
++        }
++    }
++}
+\ No newline at end of file
+Index: menus/lumbermill/Build.sync-conflict-20200729-121847-APUC2L3.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/lumbermill/Build.sync-conflict-20200729-121847-APUC2L3.py	(date 1596039434000)
++++ menus/lumbermill/Build.sync-conflict-20200729-121847-APUC2L3.py	(date 1596039434000)
+@@ -0,0 +1,164 @@
++import bpy
++import json
++from os.path import isdir, isfile
++from cgl.plugins.blender import lumbermill as lm
++from cgl.plugins.blender import utils as utils
++
++
++class Build(bpy.types.Operator):
++    """
++    Builds the shot with all the avilable elements
++    """
++    bl_idname = 'object.build'
++    bl_label = 'Build'
++
++    def execute(self, context):
++        run()
++        return {'FINISHED'}
++
++
++def defaultShotSettings():
++    scene = bpy.context.scene
++    scene.eevee.taa_render_samples = 1
++    scene.eevee.taa_samples = 1
++    scene.eevee.shadow_cube_size = '2048'
++
++
++def gather_dependencies():
++    current = lm.scene_object()
++
++    # Gather Dependencies
++    light_file = current.copy(task='light', filename='%s_%s_%s.blend' % (
++        current.seq, current.asset, 'light')).latest_version()
++
++    anim_file = current.copy(task='anim', filename='%s_%s_%s.blend' % (
++        current.seq, current.asset, 'anim')).latest_version()
++
++    layout_file = current.copy(task='lay',
++                               filename='{}_{}_{}'.format(current.seq, current.asset, 'lay'),
++                               ext='json',
++                               user='publish').latest_version()
++
++    camera_file = current.copy(task='cam',
++                               filename='{}_{}_{}'.format(current.seq, current.asset, 'cam'),
++                               ext='fbx',
++                               user='publish').latest_version()
++
++    dependencies = [light_file, anim_file, layout_file, camera_file]
++
++    return dependencies
++
++
++def required_dependencies():
++    requirements = []
++    current = lm.scene_object()
++
++    if current.task == 'lay':
++        requirements.append('lay')
++        requirements.append('cam')
++
++    if current.task == 'anim':
++        requirements.append('lay')
++        requirements.append('cam')
++    return requirements
++
++
++def import_dependencies():
++    for depObject in gather_dependencies():
++        print(depObject.path_root)
++        print(depObject.task)
++
++        if depObject.task in required_dependencies():
++            if isfile(depObject.path_root):
++                print('{} exists'.format(depObject.path_root))
++
++                if depObject.task == 'lay':
++                    print('_____LAYOUT______')
++                    print(depObject.filename)
++                    utils.read_layout()
++                    burn_in_image()
++
++                if depObject.task == 'cam':
++                    print('_________CAMERA____________')
++                    print(depObject.filename)
++                    print(111111111111111)
++                    json = depObject.copy(ext='json')
++                    print(json)
++                    lm.import_file(depObject.path_root)
++                    set_shot_duration(json)
++
++                if depObject.task == 'anim':
++                    print('_____ANIM______')
++                    print(depObject.filename)
++                    utils.read_layout()
++                    burn_in_image()
++
++            else:
++                print('{} object not Available'.format(depObject.task))
++
++        else:
++            print('{} object not Required'.format(depObject.task))
++
++
++def burn_in_image():
++    current = bpy.context.scene
++    mSettings = current.render
++    sceneObject = lm.scene_object()
++
++    current.name = sceneObject.filename_base
++    mSettings.stamp_font_size = 26
++    mSettings.use_stamp = 1
++    mSettings.use_stamp_camera = 1
++    mSettings.use_stamp_date = 0
++    mSettings.use_stamp_frame = True
++    mSettings.use_stamp_frame_range = 0
++    mSettings.use_stamp_hostname = 0
++    mSettings.use_stamp_labels = 0
++    mSettings.use_stamp_lens = 1
++    mSettings.use_stamp_marker = 0
++    mSettings.use_stamp_memory = 0
++    mSettings.use_stamp_note = 0
++    mSettings.use_stamp_render_time = 0
++    mSettings.use_stamp_scene = 1
++    mSettings.use_stamp_sequencer_strip = 0
++    mSettings.use_stamp_strip_meta = 0
++    mSettings.use_stamp_time = 1
++
++
++def set_shot_duration(camJson):
++    # dependencies  = gather_dependencies()
++    # print(dependencies)
++    default_start_frame = 1000
++    current = lm.scene_object()
++    filename = camJson
++
++    # filename = '{}_{}_{}.json'.format(current.seq, current.asset, 'cam')
++    # outFile = lm.scene_object().copy(task='cam', filename=filename).path_root
++    outFile = camJson.path_root
++
++    with open(outFile) as json_file:
++        data = json.load(json_file)
++
++    bpy.context.scene.frame_start = 1001
++    print('________________________frameset____________')
++    print('{} start'.format(data['frame_start']))
++    print('{} end'.format(data['frame_end']))
++
++    endFrame = data['frame_end'] - data['frame_start']
++    bpy.context.scene.frame_end = 1001 + int(endFrame)
++    bpy.context.scene.frame_current = 1001
++    print(endFrame)
++
++
++def buildShot():
++    defaultShotSettings()
++    import_dependencies()
++    burn_in_image()
++
++
++def run():
++    """
++    This run statement is what's executed when your button is pressed in blender.
++    :return:
++    """
++    buildShot()
+Index: menus/Rigging/CorrectiveBlendShapes.sync-conflict-20200811-122352-JVOR3BS.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/Rigging/CorrectiveBlendShapes.sync-conflict-20200811-122352-JVOR3BS.py	(date 1597073794000)
++++ menus/Rigging/CorrectiveBlendShapes.sync-conflict-20200811-122352-JVOR3BS.py	(date 1597073794000)
+@@ -0,0 +1,53 @@
++import bpy
++# from cgl.plugins.blender import lumbermill as lm
++
++class CorrectiveBlendShapes(bpy.types.Operator):
++    """
++    This class is required to register a button in blender.
++    """
++    bl_idname = 'object.corrective_blend_shapes'
++    bl_label = 'CorrectiveBlendShapes'
++
++    @classmethod
++    def poll(cls, context):
++        return context.active_object is not None
++
++    def execute(self, context):
++        run()
++        return {'FINISHED'}
++def create_drive():
++    import bpy
++    selection = bpy.context.selected_objects
++
++    # rigname = '{}_rig'.format(scene.assetname)
++
++    rig = selection[1]
++    mesh = selection[0]
++
++    posebones = bpy.context.selected_pose_bones_from_active_object
++    bone_a = posebones[1]
++    bone_b = posebones[0]
++
++    expresion = "poseBone['{}'].matrix.col[1] @ poseBone['{}'].matrix.col[1]".format(bone_a.name, bone_b.name)
++
++    fcurve = rig.data.shape_keys.key_blocks[bone_a.name.replace('c_', '')].driver_add('value')
++    driver = fcurve.driver
++    driver.expression = expresion
++    # poseBone = driver.variables.new()
++
++    var = driver.variables.new()
++
++    var.type = 'TRANSFORMS'
++    var.type = "SINGLE_PROP"
++    var.name = 'poseBone'
++    var.targets[0].id = mesh
++    var.targets[0].data_path = 'pose.bones'
++
++
++def run():
++    """
++    This run statement is what's executed when your button is pressed in blender.
++    :return:
++    """
++    create_drive()
++
+Index: menus/Modeling/Modeling.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import bpy\r\n\r\n\r\nclass Modeling(bpy.types.Panel):\r\n    bl_space_type = 'VIEW_3D'\r\n    bl_region_type = 'UI'\r\n    bl_category = 'Lumbermill'\r\n    bl_label = 'Modeling'\r\n\r\n    def draw(self, context):\r\n        \"\"\"\r\n        in here we'll have all the buttons for the Panel in the order that lumbermill saves them in.\r\n        :param context:\r\n        :return:\r\n        \"\"\"\r\n        # ADD BUTTONS\r\n        self.layout.row().operator(\"object.checknormals\")\r\n        self.layout.row().operator(\"object.create_low\")\r\n        self.layout.row().operator(\"object.publish_low\")\r\n        self.layout.row().operator(\"object.center_reset\")\r\n        self.layout.row().operator(\"object.export_to_obj\")\r\n        self.layout.row().operator(\"object.write_mesh_list\")\r\n        self.layout.row().operator(\"object.update_resolutions\")\r\n        self.layout.row().operator(\"object.copy_latest_low\")\r\n        self.layout.row().operator(\"object.fix_mesh_name\")\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/Modeling/Modeling.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ menus/Modeling/Modeling.py	(date 1607968258955)
+@@ -23,3 +23,4 @@
+         self.layout.row().operator("object.update_resolutions")
+         self.layout.row().operator("object.copy_latest_low")
+         self.layout.row().operator("object.fix_mesh_name")
++        self.layout.row().operator("object.import_base_mesh")
+Index: menus/Rigging/Rigging.sync-conflict-20200811-171621-APUC2L3.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/Rigging/Rigging.sync-conflict-20200811-171621-APUC2L3.py	(date 1597180564000)
++++ menus/Rigging/Rigging.sync-conflict-20200811-171621-APUC2L3.py	(date 1597180564000)
+@@ -0,0 +1,32 @@
++import bpy
++
++
++class Rigging(bpy.types.Panel):
++    bl_space_type = 'VIEW_3D'
++    bl_region_type = 'UI'
++    bl_category = 'Rigging'
++    bl_label = bl_category
++
++    def draw(self, context):
++        """
++        in here we'll have all the buttons for the Panel in the order that lumbermill saves them in.
++        :param context:
++        :return:
++        """
++        # ADD BUTTONS
++        self.layout.row().operator("object.simple_controller")
++        self.layout.row().operator("object.fixrignames")
++        self.layout.row().operator("object.parent_mesh_to_rig")
++        self.layout.row().operator("object.checkshaders")
++        self.layout.row().operator("object.cleanup_rig")
++        self.layout.row().operator("object.reset_armature")
++        self.layout.row().operator("object.create_hooks")
++        self.layout.row().operator("object.remove_constraints")
++        self.layout.row().operator("object.remove_modifiers")
++        self.layout.row().operator("object.corrective_blend_shapes")
++        self.layout.row().operator("object.setup_rig_test")
++        self.layout.row().operator("object.get_default_action")
++        self.layout.row().operator("object.get_default_camera")
++        self.layout.row().operator("object.mirror_shapekey")
++        self.layout.row().operator("object.default_controller_shape")
++        self.layout.row().operator("object.four_way_controller")
+Index: menus/Rigging/Rigging.sync-conflict-20200811-122352-JVOR3BS.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/Rigging/Rigging.sync-conflict-20200811-122352-JVOR3BS.py	(date 1597091158000)
++++ menus/Rigging/Rigging.sync-conflict-20200811-122352-JVOR3BS.py	(date 1597091158000)
+@@ -0,0 +1,30 @@
++import bpy
++
++
++class Rigging(bpy.types.Panel):
++    bl_space_type = 'VIEW_3D'
++    bl_region_type = 'UI'
++    bl_category = 'Rigging'
++    bl_label = bl_category
++
++    def draw(self, context):
++        """
++        in here we'll have all the buttons for the Panel in the order that lumbermill saves them in.
++        :param context:
++        :return:
++        """
++        # ADD BUTTONS
++        self.layout.row().operator("object.simple_controller")
++        self.layout.row().operator("object.fixrignames")
++        self.layout.row().operator("object.parent_mesh_to_rig")
++        self.layout.row().operator("object.checkshaders")
++        self.layout.row().operator("object.cleanup_rig")
++        self.layout.row().operator("object.reset_armature")
++        self.layout.row().operator("object.create_hooks")
++        self.layout.row().operator("object.remove_constraints")
++        self.layout.row().operator("object.remove_modifiers")
++        self.layout.row().operator("object.create_four_way_controller")
++        self.layout.row().operator("object.corrective_blend_shapes")
++        self.layout.row().operator("object.setup_rig_test")
++        self.layout.row().operator("object.get_default_action")
++        self.layout.row().operator("object.get_default_camera")
+Index: menus/lumbermill/lumbermill.sync-conflict-20200811-171621-APUC2L3.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/lumbermill/lumbermill.sync-conflict-20200811-171621-APUC2L3.py	(date 1597180564000)
++++ menus/lumbermill/lumbermill.sync-conflict-20200811-171621-APUC2L3.py	(date 1597180564000)
+@@ -0,0 +1,28 @@
++import bpy
++
++
++class lumbermill(bpy.types.Panel):
++    bl_space_type = 'VIEW_3D'
++    bl_region_type = 'UI'
++    bl_category = 'Lumbermill'
++    bl_label = bl_category
++
++    def draw(self, context):
++        """
++        in here we'll have all the buttons for the Panel in the order that lumbermill saves them in.
++        :param context:
++        :return:
++        """
++        # ADD BUTTONS
++        self.layout.row().operator("object.launch")
++        self.layout.row().operator("object.publish_item")
++        self.layout.row().operator("object.build")
++        self.layout.row().operator("object.version_up")
++        self.layout.row().operator("object.render")
++        self.layout.row().operator("object.review")
++        self.layout.row().operator("object.renamecollection")
++        self.layout.row().operator("object.turntable")
++        self.layout.row().operator("object.version_to_latest")
++        self.layout.row().operator("object.rename_object")
++        self.layout.row().operator("object.cleanup_scene")
++        self.layout.row().operator("object.delete_defaults")
+Index: menus/lumbermill/lumbermill.sync-conflict-20200811-122353-JVOR3BS.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/lumbermill/lumbermill.sync-conflict-20200811-122353-JVOR3BS.py	(date 1597091158000)
++++ menus/lumbermill/lumbermill.sync-conflict-20200811-122353-JVOR3BS.py	(date 1597091158000)
+@@ -0,0 +1,27 @@
++import bpy
++
++
++class lumbermill(bpy.types.Panel):
++    bl_space_type = 'VIEW_3D'
++    bl_region_type = 'UI'
++    bl_category = 'Lumbermill'
++    bl_label = bl_category
++
++    def draw(self, context):
++        """
++        in here we'll have all the buttons for the Panel in the order that lumbermill saves them in.
++        :param context:
++        :return:
++        """
++        # ADD BUTTONS
++        self.layout.row().operator("object.launch")
++        self.layout.row().operator("object.publish_item")
++        self.layout.row().operator("object.build")
++        self.layout.row().operator("object.version_up")
++        self.layout.row().operator("object.render")
++        self.layout.row().operator("object.review")
++        self.layout.row().operator("object.renamecollection")
++        self.layout.row().operator("object.turntable")
++        self.layout.row().operator("object.version_to_latest")
++        self.layout.row().operator("object.rename_object")
++        self.layout.row().operator("object.cleanup_scene")
+Index: menus/utilities/RenderToSource.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/utilities/RenderToSource.py	(date 1607950724000)
++++ menus/utilities/RenderToSource.py	(date 1607950724000)
+@@ -0,0 +1,30 @@
++import bpy
++from cgl.plugins.blender import lumbermill as lm
++
++class RenderToSource(bpy.types.Operator):
++    """
++    This class is required to register a button in blender.
++    """
++    bl_idname = 'object.render_to_source'
++    bl_label = 'Render To Source'
++
++    @classmethod
++    def poll(cls, context):
++        return context.active_object is not None
++
++    def execute(self, context):
++        run()
++        return {'FINISHED'}
++
++
++def run():
++    """
++    This run statement is what's executed when your button is pressed in blender.
++    :return:
++    """
++
++    scene = lm.scene_object()
++    current_source = scene.copy(context='render', filename=None, ext=None).path_root
++    current_render = scene.copy(context='source', filename=None, ext=None).path_root
++    cgl_copy(current_source,current_render)
++
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"BranchesTreeState\">\r\n    <expand>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"LOCAL_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"REMOTE_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"REMOTE_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"GROUP_NODE:origin\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n    </expand>\r\n    <select />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"292dd7de-72be-4162-9c08-eb3914d873cb\" name=\"Default Changelist\" comment=\"updated default shader and addes import audio\">\r\n      <change afterPath=\"$PROJECT_DIR$/menus/Animation/GpMainLayers.py\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/menus/Modeling/ImportBaseMesh.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/menus.cgl\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/menus.cgl\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/menus/Animation/Animation.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/menus/Animation/Animation.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/menus/Shading/DefaultShader.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/menus/Shading/DefaultShader.py\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"1hBZrC561YLCjPBaUcJijAvfFov\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"ASKED_ADD_EXTERNAL_FILES\" value=\"true\" />\r\n    <property name=\"SHARE_PROJECT_CONFIGURATION_FILES\" value=\"true\" />\r\n    <property name=\"last_opened_file_path\" value=\"$USER_HOME$/AppData/Roaming/Blender Foundation/Blender/2.83/scripts/addons/skin_selection_LC.py\" />\r\n    <property name=\"settings.editor.selected.configurable\" value=\"org.jetbrains.plugins.github.ui.GithubSettingsConfigurable\" />\r\n  </component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"D:\\COMPANIES\\_config\\cgl_tools\\blender\\menus\\Modeling\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"SvnConfiguration\">\r\n    <configuration />\r\n  </component>\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"292dd7de-72be-4162-9c08-eb3914d873cb\" name=\"Default Changelist\" comment=\"\" />\r\n      <created>1599486641195</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1599486641195</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"refformated code\">\r\n      <created>1601642898570</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1601642898570</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"added mirror vertex group and switch proxy in animation\">\r\n      <created>1601744609334</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1601744609334</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"reorganized menus to be in a single tab\">\r\n      <created>1601818293805</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1601818293805</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"grease pencil switch remove mesh controllers and some changes\">\r\n      <created>1602367566986</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602367566986</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"reorganized rig menu and added import task and replace base mesh operators\">\r\n      <created>1602434099216</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602434099216</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"reorganized roejct\">\r\n      <created>1602704192216</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602704192216</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00007\" summary=\"added shading nodes\">\r\n      <created>1602762745264</created>\r\n      <option name=\"number\" value=\"00007\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602762745264</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00008\" summary=\"updating menus that were lost\">\r\n      <created>1602768115374</created>\r\n      <option name=\"number\" value=\"00008\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602768115374</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00009\" summary=\" &#10;changes on read layout from selected to alert user if there isnt a layout file\">\r\n      <created>1602851160961</created>\r\n      <option name=\"number\" value=\"00009\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602851160961</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00010\" summary=\"mdl preflights\">\r\n      <created>1602852371382</created>\r\n      <option name=\"number\" value=\"00010\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00010\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602852371382</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00011\" summary=\"updated switch task\">\r\n      <created>1602852967417</created>\r\n      <option name=\"number\" value=\"00011\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00011\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602852967417</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00012\" summary=\"consolidated unlink asset\">\r\n      <created>1602853588409</created>\r\n      <option name=\"number\" value=\"00012\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00012\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602853588409</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00013\" summary=\"consolidated unlink asset\">\r\n      <created>1602853600589</created>\r\n      <option name=\"number\" value=\"00013\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00013\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1602853600589</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00014\" summary=\"reworked build and remove environments\">\r\n      <created>1603034384240</created>\r\n      <option name=\"number\" value=\"00014\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00014\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1603034384240</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00015\" summary=\"deleted some unecessary files\">\r\n      <created>1603096275345</created>\r\n      <option name=\"number\" value=\"00015\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00015\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1603096275345</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00016\" summary=\"updated\">\r\n      <created>1603215123814</created>\r\n      <option name=\"number\" value=\"00016\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00016\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1603215123814</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00017\" summary=\"updated\">\r\n      <created>1603331222981</created>\r\n      <option name=\"number\" value=\"00017\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00017\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1603331222981</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00018\" summary=\"updated\">\r\n      <created>1604417914481</created>\r\n      <option name=\"number\" value=\"00018\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00018\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1604417914481</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00019\" summary=\"added copy to task and import rig, general stability fixes\">\r\n      <created>1605864983242</created>\r\n      <option name=\"number\" value=\"00019\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00019\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1605864983242</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00020\" summary=\"updated default shader and addes import audio\">\r\n      <created>1606138456689</created>\r\n      <option name=\"number\" value=\"00020\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00020\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1606138456689</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"21\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n    <option name=\"oldMeFiltersMigrated\" value=\"true\" />\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <option name=\"ADD_EXTERNAL_FILES_SILENTLY\" value=\"true\" />\r\n    <MESSAGE value=\"refformated code\" />\r\n    <MESSAGE value=\"added mirror vertex group and switch proxy in animation\" />\r\n    <MESSAGE value=\"reorganized menus to be in a single tab\" />\r\n    <MESSAGE value=\"grease pencil switch remove mesh controllers and some changes\" />\r\n    <MESSAGE value=\"reorganized rig menu and added import task and replace base mesh operators\" />\r\n    <MESSAGE value=\"reorganized roejct\" />\r\n    <MESSAGE value=\"added shading nodes\" />\r\n    <MESSAGE value=\"updating menus that were lost\" />\r\n    <MESSAGE value=\" &#10;changes on read layout from selected to alert user if there isnt a layout file\" />\r\n    <MESSAGE value=\"mdl preflights\" />\r\n    <MESSAGE value=\"updated switch task\" />\r\n    <MESSAGE value=\"consolidated unlink asset\" />\r\n    <MESSAGE value=\"reworked build and remove environments\" />\r\n    <MESSAGE value=\"deleted some unecessary files\" />\r\n    <MESSAGE value=\"updated\" />\r\n    <MESSAGE value=\"added copy to task and import rig, general stability fixes\" />\r\n    <MESSAGE value=\"updated default shader and addes import audio\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"updated default shader and addes import audio\" />\r\n  </component>\r\n  <component name=\"WindowStateProjectService\">\r\n    <state x=\"-2967\" y=\"355\" key=\"#Plugins\" timestamp=\"1600533268148\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1420\" />\r\n    </state>\r\n    <state x=\"-2967\" y=\"355\" key=\"#Plugins/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1600533268148\" />\r\n    <state x=\"736\" y=\"357\" key=\"#com.intellij.execution.impl.EditConfigurationsDialog\" timestamp=\"1605864952136\">\r\n      <screen x=\"0\" y=\"0\" width=\"2560\" height=\"1409\" />\r\n    </state>\r\n    <state x=\"736\" y=\"357\" key=\"#com.intellij.execution.impl.EditConfigurationsDialog/-3840.18.2560.1409/0.2160.1600.1170/0.0.2560.1409@0.0.2560.1409\" timestamp=\"1605864952136\" />\r\n    <state x=\"-3104\" y=\"369\" key=\"#com.intellij.execution.impl.EditConfigurationsDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1602704917407\" />\r\n    <state x=\"-2820\" y=\"335\" key=\"#com.intellij.ide.util.MemberChooser\" timestamp=\"1600277067647\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1420\" />\r\n    </state>\r\n    <state x=\"-2820\" y=\"335\" key=\"#com.intellij.ide.util.MemberChooser/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1600277067647\" />\r\n    <state x=\"765\" y=\"241\" key=\"#com.intellij.ide.util.MemberChooser/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@0.0.1920.1050\" timestamp=\"1599698743760\" />\r\n    <state x=\"-3747\" y=\"102\" width=\"2375\" height=\"1224\" key=\"DiffContextDialog\" timestamp=\"1602851580438\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1420\" />\r\n    </state>\r\n    <state x=\"-3747\" y=\"102\" width=\"2375\" height=\"1224\" key=\"DiffContextDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1602851580438\" />\r\n    <state x=\"970\" y=\"1462\" key=\"FileChooserDialogImpl\" timestamp=\"1602674159462\">\r\n      <screen x=\"307\" y=\"1080\" width=\"1600\" height=\"1170\" />\r\n    </state>\r\n    <state x=\"970\" y=\"1462\" key=\"FileChooserDialogImpl/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@307.1080.1600.1170\" timestamp=\"1602674159462\" />\r\n    <state x=\"-2779\" y=\"469\" key=\"FileChooserDialogImpl/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1602437834992\" />\r\n    <state x=\"-2760\" y=\"633\" key=\"Github.CreateGistDialog\" timestamp=\"1601642520381\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1409\" />\r\n    </state>\r\n    <state x=\"-2760\" y=\"633\" key=\"Github.CreateGistDialog/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1601642520381\" />\r\n    <state x=\"-2961\" y=\"622\" width=\"536\" height=\"193\" key=\"Github.ShareDialog\" timestamp=\"1602704965211\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1420\" />\r\n    </state>\r\n    <state x=\"-2961\" y=\"622\" key=\"Github.ShareDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1602704965210\" />\r\n    <state x=\"-2961\" y=\"617\" width=\"536\" height=\"193\" key=\"Github.ShareDialog/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1601642638195\" />\r\n    <state x=\"-2781\" y=\"340\" width=\"1013\" height=\"754\" key=\"Github.UntrackedFilesDialog\" timestamp=\"1602704973963\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1420\" />\r\n    </state>\r\n    <state x=\"-2781\" y=\"340\" key=\"Github.UntrackedFilesDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1602704973963\" />\r\n    <state x=\"-2781\" y=\"337\" width=\"1013\" height=\"754\" key=\"Github.UntrackedFilesDialog/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1601642649247\" />\r\n    <state x=\"-2788\" y=\"333\" key=\"RollbackChangesDialog\" timestamp=\"1602851756229\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1420\" />\r\n    </state>\r\n    <state x=\"-2788\" y=\"333\" key=\"RollbackChangesDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1602851756229\" />\r\n    <state x=\"-3028\" y=\"360\" key=\"SettingsEditor\" timestamp=\"1602704939404\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1420\" />\r\n    </state>\r\n    <state x=\"-3028\" y=\"360\" key=\"SettingsEditor/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1602704939404\" />\r\n    <state x=\"-2967\" y=\"362\" key=\"Vcs.Push.Dialog.v2\" timestamp=\"1604417928672\">\r\n      <screen x=\"-3840\" y=\"-72\" width=\"2560\" height=\"1409\" />\r\n    </state>\r\n    <state x=\"-2967\" y=\"362\" key=\"Vcs.Push.Dialog.v2/-3840.-72.2560.1409/981.2160.1600.1170/0.0.2560.1409@-3840.-72.2560.1409\" timestamp=\"1604417928672\" />\r\n    <state x=\"-2967\" y=\"443\" key=\"Vcs.Push.Dialog.v2/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1603331236232\" />\r\n    <state x=\"-3747\" y=\"102\" width=\"2375\" height=\"1224\" key=\"com.intellij.history.integration.ui.views.DirectoryHistoryDialog\" timestamp=\"1602852396400\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1420\" />\r\n    </state>\r\n    <state x=\"-3747\" y=\"102\" width=\"2375\" height=\"1224\" key=\"com.intellij.history.integration.ui.views.DirectoryHistoryDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1602852396400\" />\r\n    <state x=\"-3747\" y=\"102\" width=\"2375\" height=\"1224\" key=\"com.intellij.history.integration.ui.views.DirectoryHistoryDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@307.1080.1600.1170\" timestamp=\"1602689775501\" />\r\n    <state x=\"-3779\" y=\"105\" width=\"2373\" height=\"1163\" key=\"com.intellij.history.integration.ui.views.FileHistoryDialog\" timestamp=\"1605801983489\">\r\n      <screen x=\"-3840\" y=\"18\" width=\"2560\" height=\"1409\" />\r\n    </state>\r\n    <state x=\"-7\" y=\"0\" width=\"1656\" height=\"916\" key=\"com.intellij.history.integration.ui.views.FileHistoryDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1603031262893\" />\r\n    <state x=\"-7\" y=\"0\" width=\"1076\" height=\"725\" key=\"com.intellij.history.integration.ui.views.FileHistoryDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@0.0.1920.1050\" timestamp=\"1602773775462\" />\r\n    <state x=\"345\" y=\"1204\" width=\"1447\" height=\"966\" key=\"com.intellij.history.integration.ui.views.FileHistoryDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@307.1080.1600.1170\" timestamp=\"1602704691439\" />\r\n    <state x=\"-3779\" y=\"96\" width=\"2373\" height=\"1163\" key=\"com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1920.1050/-3840.9.2560.1409/0.2160.1600.1170@-3840.9.2560.1409\" timestamp=\"1603460955680\" />\r\n    <state x=\"-3779\" y=\"96\" width=\"2373\" height=\"1163\" key=\"com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1920.1050/-3840.9.2560.1409/110.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1603766959507\" />\r\n    <state x=\"-3779\" y=\"96\" width=\"2373\" height=\"1163\" key=\"com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1603378953237\" />\r\n    <state x=\"-3779\" y=\"105\" width=\"2373\" height=\"1163\" key=\"com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.2560.1409/-3840.18.2560.1409/0.2160.1600.1170@-3840.18.2560.1409\" timestamp=\"1605801983489\" />\r\n    <state x=\"-2926\" y=\"329\" key=\"com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser\" timestamp=\"1602439151935\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1409\" />\r\n    </state>\r\n    <state x=\"-2926\" y=\"329\" key=\"com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1602439151935\" />\r\n    <state x=\"1061\" y=\"615\" key=\"com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2\" timestamp=\"1605864922878\">\r\n      <screen x=\"0\" y=\"0\" width=\"2560\" height=\"1409\" />\r\n    </state>\r\n    <state x=\"1061\" y=\"615\" key=\"com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/-3840.18.2560.1409/0.2160.1600.1170/0.0.2560.1409@0.0.2560.1409\" timestamp=\"1605864922878\" />\r\n    <state x=\"-2779\" y=\"624\" key=\"com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1603284069894\" />\r\n    <state x=\"-2861\" y=\"300\" width=\"602\" height=\"828\" key=\"find.popup\" timestamp=\"1603289776410\">\r\n      <screen x=\"-3840\" y=\"9\" width=\"2560\" height=\"1409\" />\r\n    </state>\r\n    <state x=\"-2861\" y=\"300\" width=\"602\" height=\"828\" key=\"find.popup/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1603289776410\" />\r\n    <state x=\"-3009\" y=\"323\" width=\"896\" height=\"910\" key=\"search.everywhere.popup\" timestamp=\"1606140820893\">\r\n      <screen x=\"-3840\" y=\"18\" width=\"2560\" height=\"1409\" />\r\n    </state>\r\n    <state x=\"-3009\" y=\"233\" width=\"896\" height=\"910\" key=\"search.everywhere.popup/-3840.-72.2560.1409/981.2160.1600.1170/0.0.2560.1409@-3840.-72.2560.1409\" timestamp=\"1604417925463\" />\r\n    <state x=\"-3009\" y=\"323\" width=\"896\" height=\"910\" key=\"search.everywhere.popup/-3840.18.2560.1409/0.2160.1600.1170/0.0.2560.1409@-3840.18.2560.1409\" timestamp=\"1606140820893\" />\r\n    <state x=\"-3009\" y=\"316\" width=\"896\" height=\"917\" key=\"search.everywhere.popup/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420\" timestamp=\"1603121367546\" />\r\n    <state x=\"623\" y=\"227\" width=\"672\" height=\"678\" key=\"search.everywhere.popup/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@0.0.1920.1050\" timestamp=\"1602350476090\" />\r\n    <state x=\"826\" y=\"1333\" width=\"672\" height=\"756\" key=\"search.everywhere.popup/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@307.1080.1600.1170\" timestamp=\"1602704768937\" />\r\n    <state x=\"-3009\" y=\"314\" width=\"896\" height=\"910\" key=\"search.everywhere.popup/0.0.1920.1050/-3840.9.2560.1409/0.2160.1600.1170@-3840.9.2560.1409\" timestamp=\"1603461391515\" />\r\n    <state x=\"-3009\" y=\"314\" width=\"896\" height=\"910\" key=\"search.everywhere.popup/0.0.1920.1050/-3840.9.2560.1409/110.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1603766931117\" />\r\n    <state x=\"-3009\" y=\"314\" width=\"896\" height=\"910\" key=\"search.everywhere.popup/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409\" timestamp=\"1603378828970\" />\r\n    <state x=\"623\" y=\"227\" width=\"672\" height=\"678\" key=\"search.everywhere.popup/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@0.0.1920.1050\" timestamp=\"1602592399805\" />\r\n    <state x=\"-3009\" y=\"323\" width=\"896\" height=\"910\" key=\"search.everywhere.popup/0.0.2560.1409/-3840.18.2560.1409/0.2160.1600.1170@-3840.18.2560.1409\" timestamp=\"1605829933697\" />\r\n  </component>\r\n  <component name=\"XDebuggerManager\">\r\n    <breakpoint-manager>\r\n      <breakpoints>\r\n        <line-breakpoint enabled=\"true\" suspend=\"THREAD\" type=\"python-line\">\r\n          <url>file://$PROJECT_DIR$/menus/lumbermill/Renamecollection.py</url>\r\n          <line>25</line>\r\n          <option name=\"timeStamp\" value=\"2\" />\r\n        </line-breakpoint>\r\n        <line-breakpoint enabled=\"true\" suspend=\"THREAD\" type=\"python-line\">\r\n          <url>file://$PROJECT_DIR$/menus/Shading/SetupShaderColor.py</url>\r\n          <line>63</line>\r\n          <option name=\"timeStamp\" value=\"3\" />\r\n        </line-breakpoint>\r\n      </breakpoints>\r\n    </breakpoint-manager>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/workspace.xml	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ .idea/workspace.xml	(date 1607968275022)
+@@ -19,13 +19,35 @@
+     <select />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="292dd7de-72be-4162-9c08-eb3914d873cb" name="Default Changelist" comment="updated default shader and addes import audio">
+-      <change afterPath="$PROJECT_DIR$/menus/Animation/GpMainLayers.py" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/menus/Modeling/ImportBaseMesh.py" afterDir="false" />
++    <list default="true" id="292dd7de-72be-4162-9c08-eb3914d873cb" name="Default Changelist" comment="added import basemesh">
++      <change afterPath="$PROJECT_DIR$/menus.sync-conflict-20200805-192134-APUC2L3.cgl" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus.sync-conflict-20200811-122352-JVOR3BS.cgl" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus.sync-conflict-20200811-171621-APUC2L3.cgl" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus.sync-conflict-20200814-134736-APUC2L3.cgl" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/Rigging/CorrectiveBlendShapes.sync-conflict-20200811-122352-JVOR3BS.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/Rigging/Rigging.sync-conflict-20200811-122352-JVOR3BS.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/Rigging/Rigging.sync-conflict-20200811-171621-APUC2L3.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/Rigging/SetupRigTest.sync-conflict-20200811-122353-JVOR3BS.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/lumbermill/Build.sync-conflict-20200729-121847-APUC2L3.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/lumbermill/lumbermill.sync-conflict-20200811-122353-JVOR3BS.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/lumbermill/lumbermill.sync-conflict-20200811-171621-APUC2L3.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/utilities/CopyToAnimProject.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/utilities/MoveToAnimProject.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/menus/utilities/RenderToSource.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/preflights.sync-conflict-20200804-134156-APUC2L3.cgl" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/preflights.sync-conflict-20200805-162318-APUC2L3.cgl" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/menus.cgl" beforeDir="false" afterPath="$PROJECT_DIR$/menus.cgl" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/menus/Animation/Animation.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus/Animation/Animation.py" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/menus/Shading/DefaultShader.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus/Shading/DefaultShader.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/menus/Modeling/ImportBaseMesh.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus/Modeling/ImportBaseMesh.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/menus/Modeling/Modeling.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus/Modeling/Modeling.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/menus/Rigging/Rigging.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus/Rigging/Rigging.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/menus/utilities/ImportAsset.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus/utilities/ImportAsset.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/menus/utilities/ImportTask.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus/utilities/ImportTask.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/menus/utilities/utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/menus/utilities/utilities.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/preflights/mdl/CleanScene.py" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/preflights/mdl/CleanTurntable.py" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/preflights/mdl/CollectionName.py" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/preflights/rig/Parentmeshtorig.py" beforeDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -35,6 +57,7 @@
+   <component name="Git.Settings">
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+   </component>
++  <component name="JupyterTrust" id="ab651f83-a98d-48b5-9e06-6a6c3b4272cd" />
+   <component name="ProjectId" id="1hBZrC561YLCjPBaUcJijAvfFov" />
+   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+     <ConfirmationsSetting value="2" id="Add" />
+@@ -45,7 +68,9 @@
+   </component>
+   <component name="PropertiesComponent">
+     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
++    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
++    <property name="WebServerToolWindowFactoryState" value="false" />
+     <property name="last_opened_file_path" value="$USER_HOME$/AppData/Roaming/Blender Foundation/Blender/2.83/scripts/addons/skin_selection_LC.py" />
+     <property name="settings.editor.selected.configurable" value="org.jetbrains.plugins.github.ui.GithubSettingsConfigurable" />
+   </component>
+@@ -54,6 +79,7 @@
+       <recent name="D:\COMPANIES\_config\cgl_tools\blender\menus\Modeling" />
+     </key>
+   </component>
++  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+   <component name="SvnConfiguration">
+     <configuration />
+   </component>
+@@ -64,6 +90,7 @@
+       <option name="number" value="Default" />
+       <option name="presentableId" value="Default" />
+       <updated>1599486641195</updated>
++      <workItem from="1607968198052" duration="77000" />
+     </task>
+     <task id="LOCAL-00001" summary="refformated code">
+       <created>1601642898570</created>
+@@ -205,8 +232,18 @@
+       <option name="project" value="LOCAL" />
+       <updated>1606138456689</updated>
+     </task>
+-    <option name="localTasksCounter" value="21" />
++    <task id="LOCAL-00021" summary="added import basemesh">
++      <created>1606142128144</created>
++      <option name="number" value="00021" />
++      <option name="presentableId" value="LOCAL-00021" />
++      <option name="project" value="LOCAL" />
++      <updated>1606142128144</updated>
++    </task>
++    <option name="localTasksCounter" value="22" />
+     <servers />
++  </component>
++  <component name="TypeScriptGeneratedFilesManager">
++    <option name="version" value="3" />
+   </component>
+   <component name="Vcs.Log.Tabs.Properties">
+     <option name="TAB_STATES">
+@@ -239,7 +276,8 @@
+     <MESSAGE value="updated" />
+     <MESSAGE value="added copy to task and import rig, general stability fixes" />
+     <MESSAGE value="updated default shader and addes import audio" />
+-    <option name="LAST_COMMIT_MESSAGE" value="updated default shader and addes import audio" />
++    <MESSAGE value="added import basemesh" />
++    <option name="LAST_COMMIT_MESSAGE" value="added import basemesh" />
+   </component>
+   <component name="WindowStateProjectService">
+     <state x="-2967" y="355" key="#Plugins" timestamp="1600533268148">
+@@ -292,12 +330,13 @@
+     </state>
+     <state x="-2967" y="362" key="Vcs.Push.Dialog.v2/-3840.-72.2560.1409/981.2160.1600.1170/0.0.2560.1409@-3840.-72.2560.1409" timestamp="1604417928672" />
+     <state x="-2967" y="443" key="Vcs.Push.Dialog.v2/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409" timestamp="1603331236232" />
+-    <state x="-3747" y="102" width="2375" height="1224" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog" timestamp="1602852396400">
+-      <screen x="-3840" y="9" width="2560" height="1420" />
++    <state x="93" y="92" width="2375" height="1215" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog" timestamp="1607951545797">
++      <screen x="0" y="0" width="2560" height="1409" />
+     </state>
+     <state x="-3747" y="102" width="2375" height="1224" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420" timestamp="1602852396400" />
+     <state x="-3747" y="102" width="2375" height="1224" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@307.1080.1600.1170" timestamp="1602689775501" />
+-    <state x="-3779" y="105" width="2373" height="1163" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1605801983489">
++    <state x="93" y="92" width="2375" height="1215" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog/0.0.2560.1409/-3840.18.2560.1409/0.2160.1600.1170@0.0.2560.1409" timestamp="1607951545797" />
++    <state x="-3779" y="105" width="2373" height="1163" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1607952444559">
+       <screen x="-3840" y="18" width="2560" height="1409" />
+     </state>
+     <state x="-7" y="0" width="1656" height="916" key="com.intellij.history.integration.ui.views.FileHistoryDialog/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420" timestamp="1603031262893" />
+@@ -306,7 +345,8 @@
+     <state x="-3779" y="96" width="2373" height="1163" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1920.1050/-3840.9.2560.1409/0.2160.1600.1170@-3840.9.2560.1409" timestamp="1603460955680" />
+     <state x="-3779" y="96" width="2373" height="1163" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1920.1050/-3840.9.2560.1409/110.1080.1600.1170@-3840.9.2560.1409" timestamp="1603766959507" />
+     <state x="-3779" y="96" width="2373" height="1163" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409" timestamp="1603378953237" />
+-    <state x="-3779" y="105" width="2373" height="1163" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.2560.1409/-3840.18.2560.1409/0.2160.1600.1170@-3840.18.2560.1409" timestamp="1605801983489" />
++    <state x="-3779" y="105" width="2373" height="1163" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.2560.1409/-3840.18.2560.1409/0.2160.1600.1170@-3840.18.2560.1409" timestamp="1607952444559" />
++    <state x="61" y="87" width="2373" height="1163" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.2560.1409/-3840.18.2560.1409/0.2160.1600.1170@0.0.2560.1409" timestamp="1607951885379" />
+     <state x="-2926" y="329" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1602439151935">
+       <screen x="-3840" y="9" width="2560" height="1409" />
+     </state>
+@@ -320,11 +360,12 @@
+       <screen x="-3840" y="9" width="2560" height="1409" />
+     </state>
+     <state x="-2861" y="300" width="602" height="828" key="find.popup/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409" timestamp="1603289776410" />
+-    <state x="-3009" y="323" width="896" height="910" key="search.everywhere.popup" timestamp="1606140820893">
+-      <screen x="-3840" y="18" width="2560" height="1409" />
++    <state x="831" y="305" width="896" height="910" key="search.everywhere.popup" timestamp="1607950700952">
++      <screen x="0" y="0" width="2560" height="1409" />
+     </state>
+     <state x="-3009" y="233" width="896" height="910" key="search.everywhere.popup/-3840.-72.2560.1409/981.2160.1600.1170/0.0.2560.1409@-3840.-72.2560.1409" timestamp="1604417925463" />
+-    <state x="-3009" y="323" width="896" height="910" key="search.everywhere.popup/-3840.18.2560.1409/0.2160.1600.1170/0.0.2560.1409@-3840.18.2560.1409" timestamp="1606140820893" />
++    <state x="-3009" y="323" width="896" height="910" key="search.everywhere.popup/-3840.18.2560.1409/0.2160.1600.1170/0.0.2560.1409@-3840.18.2560.1409" timestamp="1606143946833" />
++    <state x="831" y="305" width="896" height="910" key="search.everywhere.popup/-3840.18.2560.1409/0.2160.1600.1170/0.0.2560.1409@0.0.2560.1409" timestamp="1607787046509" />
+     <state x="-3009" y="316" width="896" height="917" key="search.everywhere.popup/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@-3840.9.2560.1420" timestamp="1603121367546" />
+     <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@0.0.1920.1050" timestamp="1602350476090" />
+     <state x="826" y="1333" width="672" height="756" key="search.everywhere.popup/-3840.9.2560.1420/307.1080.1600.1170/0.0.1920.1050@307.1080.1600.1170" timestamp="1602704768937" />
+@@ -333,6 +374,7 @@
+     <state x="-3009" y="314" width="896" height="910" key="search.everywhere.popup/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@-3840.9.2560.1409" timestamp="1603378828970" />
+     <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050/-3840.9.2560.1409/307.1080.1600.1170@0.0.1920.1050" timestamp="1602592399805" />
+     <state x="-3009" y="323" width="896" height="910" key="search.everywhere.popup/0.0.2560.1409/-3840.18.2560.1409/0.2160.1600.1170@-3840.18.2560.1409" timestamp="1605829933697" />
++    <state x="831" y="305" width="896" height="910" key="search.everywhere.popup/0.0.2560.1409/-3840.18.2560.1409/0.2160.1600.1170@0.0.2560.1409" timestamp="1607950700952" />
+   </component>
+   <component name="XDebuggerManager">
+     <breakpoint-manager>
+Index: menus/utilities/MoveToAnimProject.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/utilities/MoveToAnimProject.py	(date 1607950724000)
++++ menus/utilities/MoveToAnimProject.py	(date 1607950724000)
+@@ -0,0 +1,26 @@
++import bpy
++# from cgl.plugins.blender import lumbermill as lm
++
++class MoveToAnimProject(bpy.types.Operator):
++    """
++    This class is required to register a button in blender.
++    """
++    bl_idname = 'object.move_to_anim_project'
++    bl_label = 'Move To Anim Project'
++
++    @classmethod
++    def poll(cls, context):
++        return context.active_object is not None
++
++    def execute(self, context):
++        run()
++        return {'FINISHED'}
++
++
++def run():
++    """
++    This run statement is what's executed when your button is pressed in blender.
++    :return:
++    """
++    print('Hello World!: button_template')
++
+Index: menus/Rigging/Rigging.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import bpy\r\n\r\n\r\nclass Rigging(bpy.types.Panel):\r\n    bl_space_type = 'VIEW_3D'\r\n    bl_region_type = 'UI'\r\n    bl_category = 'Lumbermill'\r\n    bl_label = 'Rigging'\r\n\r\n    def draw(self, context):\r\n        \"\"\"\r\n        in here we'll have all the buttons for the Panel in the order that lumbermill saves them in.\r\n        :param context:\r\n        :return:\r\n        \"\"\"\r\n        # ADD BUTTONS\r\n        self.layout.row().operator(\"object.simple_controller\")\r\n        self.layout.row().operator(\"object.fixrignames\")\r\n        self.layout.row().operator(\"object.parent_mesh_to_rig\")\r\n        self.layout.row().operator(\"object.checkshaders\")\r\n        self.layout.row().operator(\"object.cleanup_rig\")\r\n        self.layout.row().operator(\"object.reset_armature\")\r\n        self.layout.row().operator(\"object.create_hooks\")\r\n        self.layout.row().operator(\"object.remove_constraints\")\r\n        self.layout.row().operator(\"object.remove_modifiers\")\r\n        self.layout.row().operator(\"object.corrective_blend_shapes\")\r\n        self.layout.row().operator(\"object.setup_rig_test\")\r\n        self.layout.row().operator(\"object.get_default_action\")\r\n        self.layout.row().operator(\"object.get_default_camera\")\r\n        self.layout.row().operator(\"object.add_controllers\")\r\n        self.layout.row().operator(\"object.set_color_from_parent\")\r\n        self.layout.row().operator(\"object.default_controller_shape\")\r\n        self.layout.row().operator(\"object.mesh_to_mdl_task\")\r\n        self.layout.row().operator(\"object.cleanup_weights\")\r\n        self.layout.row().operator(\"object.mirror_vertex_groups\")\r\n        self.layout.row().operator(\"object.remove_mesh_controllers\")\r\n        self.layout.row().operator(\"object.copy_skin_weights\")\r\n        self.layout.row().operator(\"object.remove_drivers\")\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/Rigging/Rigging.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ menus/Rigging/Rigging.py	(date 1607968258980)
+@@ -35,4 +35,5 @@
+         self.layout.row().operator("object.mirror_vertex_groups")
+         self.layout.row().operator("object.remove_mesh_controllers")
+         self.layout.row().operator("object.copy_skin_weights")
++        self.layout.row().operator("object.edgard")
+         self.layout.row().operator("object.remove_drivers")
+Index: menus/utilities/CopyToAnimProject.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/utilities/CopyToAnimProject.py	(date 1607952562000)
++++ menus/utilities/CopyToAnimProject.py	(date 1607952562000)
+@@ -0,0 +1,49 @@
++import bpy
++# from cgl.plugins.blender import lumbermill as lm
++
++class CopyToAnimProject(bpy.types.Operator):
++    """
++    This class is required to register a button in blender.
++    """
++    bl_idname = 'object.copy_to_anim_project'
++    bl_label = 'Copy To Anim Project'
++
++    @classmethod
++    def poll(cls, context):
++        return context.active_object is not None
++
++    def execute(self, context):
++        run()
++        return {'FINISHED'}
++
++
++from cgl.plugins.blender import lumbermill as lm
++from cgl.core.utils.general import split_all, cgl_copy
++
++def move_to_project(project):
++    context = ['source', 'render']
++    scene = lm.scene_object()
++    for item in context:
++        fromDir = scene.copy(context=item, filename=None).path_root
++        toDir = scene.copy(context=item, filename=None, project=project).path_root
++        cgl_copy(fromDir, toDir)
++
++
++def run():
++    """
++    This run statement is what's executed when your button is pressed in blender.
++    :return:
++    """
++
++
++
++    # project = lm.InputDialog(title='Move to project',
++    #                   message='Please Type project Name', line_edit=True,
++    #                   regex='^([a-z]{3,}, *)*[a-z]{3,}', name_example='MILVIO_ANIM',buttons = ['ok','cancel'])
++
++
++    project = 'MILVIO_ANIM'
++
++    #if project[1] == 'ok':
++
++    move_to_project(project[0])
+\ No newline at end of file
+Index: menus/utilities/utilities.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import bpy\r\n\r\n\r\nclass utilities(bpy.types.Panel):\r\n    bl_space_type = 'VIEW_3D'\r\n    bl_region_type = 'UI'\r\n    bl_category = 'Lumbermill'\r\n    bl_label = 'Utilities'\r\n\r\n    def draw(self, context):\r\n        \"\"\"\r\n        in here we'll have all the buttons for the Panel in the order that lumbermill saves them in.\r\n        :param context:\r\n        :return:\r\n        \"\"\"\r\n        # ADD BUTTONS\r\n        self.layout.row().operator(\"object.import_asset\")\r\n        self.layout.row().operator(\"object.correct_file_name\")\r\n        self.layout.row().operator(\"object.open_asset\")\r\n        self.layout.row().operator(\"object.open_shot\")\r\n        self.layout.row().operator(\"object.delete_defaults\")\r\n        self.layout.row().operator(\"object.import_references\")\r\n        self.layout.row().operator(\"object.import_audio\")\r\n        self.layout.row().operator(\"object.delete_turntable\")\r\n        self.layout.row().operator(\"object.setup_collections\")\r\n        self.layout.row().operator(\"object.fix_collection_name\")\r\n        self.layout.row().operator(\"object.rename_object\")\r\n        self.layout.row().operator(\"object.cleanup_scene\")\r\n        self.layout.row().operator(\"object.show_in_folder\")\r\n        self.layout.row().operator(\"object.delete_workspaces\")\r\n        self.layout.row().operator(\"object.switch_users\")\r\n        self.layout.row().operator(\"object.switch_task\")\r\n        self.layout.row().operator(\"object.switch_versions\")\r\n        self.layout.row().operator(\"object.switch_resolution\")\r\n        self.layout.row().operator(\"object.open_selected\")\r\n        self.layout.row().operator(\"object.collection_to_asset\")\r\n        self.layout.row().operator(\"object.open_documentation\")\r\n        self.layout.row().operator(\"object.source_to_render\")\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- menus/utilities/utilities.py	(revision 0a44acc6f0ff88c3ca4f142c6727163d882bbd2a)
++++ menus/utilities/utilities.py	(date 1607968259023)
+@@ -36,3 +36,4 @@
+         self.layout.row().operator("object.collection_to_asset")
+         self.layout.row().operator("object.open_documentation")
+         self.layout.row().operator("object.source_to_render")
++        self.layout.row().operator("object.copy_to_anim_project")
+Index: preflights.sync-conflict-20200805-162318-APUC2L3.cgl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- preflights.sync-conflict-20200805-162318-APUC2L3.cgl	(date 1596658548000)
++++ preflights.sync-conflict-20200805-162318-APUC2L3.cgl	(date 1596658548000)
+@@ -0,0 +1,121 @@
++{
++    "blender": {
++        "anim": {
++            "CheckActionName": {
++                "label": "CheckActionName",
++                "module": "cgl_tools.blender.preflights.anim.CheckActionName",
++                "name": "CheckActionName",
++                "order": 1,
++                "required": "True"
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "cgl_tools.blender.preflights.anim.Publish",
++                "name": "Publish",
++                "order": 2,
++                "required": "True"
++            },
++            "order": 4
++        },
++        "default": {
++            "Publish": {
++                "label": "Publish",
++                "module": "cgl_tools.blender.preflights.default.Publish",
++                "name": "Publish",
++                "order": 1,
++                "required": "True"
++            },
++            "order": 2
++        },
++        "mdl": {
++            "Checknormals": {
++                "label": "Checknormals",
++                "module": "cgl_tools.blender.preflights.mdl.Checknormals",
++                "name": "Checknormals",
++                "order": 4,
++                "required": "True"
++            },
++            "Cleanturntable": {
++                "label": "Cleanturntable",
++                "module": "cgl_tools.blender.preflights.mdl.Cleanturntable",
++                "name": "Cleanturntable",
++                "order": 3,
++                "required": "True"
++            },
++            "Collectionname": {
++                "label": "Collectionname",
++                "module": "cgl_tools.blender.preflights.mdl.Collectionname",
++                "name": "Collectionname",
++                "order": 2,
++                "required": "True"
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "cgl_tools.blender.preflights.mdl.Publish",
++                "name": "Publish",
++                "order": 5,
++                "required": "True"
++            },
++            "Viewportcolors": {
++                "label": "Viewportcolors",
++                "module": "cgl_tools.blender.preflights.mdl.Viewportcolors",
++                "name": "Viewportcolors",
++                "order": 1,
++                "required": "True"
++            },
++            "order": 1
++        },
++        "rig": {
++            "Checkrigname": {
++                "label": "Checkrigname",
++                "module": "cgl_tools.blender.preflights.rig.Checkrigname",
++                "name": "Checkrigname",
++                "order": 2,
++                "required": "True"
++            },
++            "Checkshaders": {
++                "label": "Checkshaders",
++                "module": "cgl_tools.blender.preflights.rig.Checkshaders",
++                "name": "Checkshaders",
++                "order": 4,
++                "required": "True"
++            },
++            "Cleanrigscene": {
++                "label": "Cleanrigscene",
++                "module": "cgl_tools.blender.preflights.rig.Cleanrigscene",
++                "name": "Cleanrigscene",
++                "order": 6,
++                "required": "True"
++            },
++            "Parentmeshtorig": {
++                "label": "Parentmeshtorig",
++                "module": "cgl_tools.blender.preflights.rig.Parentmeshtorig",
++                "name": "Parentmeshtorig",
++                "order": 3,
++                "required": "True"
++            },
++            "Publish": {
++                "label": "Publish",
++                "module": "cgl_tools.blender.preflights.rig.Publish",
++                "name": "Publish",
++                "order": 7,
++                "required": "True"
++            },
++            "Resetbones": {
++                "label": "Resetbones",
++                "module": "cgl_tools.blender.preflights.rig.Resetbones",
++                "name": "Resetbones",
++                "order": 5,
++                "required": "True"
++            },
++            "Savecurrentscene": {
++                "label": "Savecurrentscene",
++                "module": "cgl_tools.blender.preflights.rig.Savecurrentscene",
++                "name": "Savecurrentscene",
++                "order": 1,
++                "required": "True"
++            },
++            "order": 3
++        }
++    }
++}
+\ No newline at end of file

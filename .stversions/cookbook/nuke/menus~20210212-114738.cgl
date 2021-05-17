@@ -1,0 +1,138 @@
+{
+    "nuke": [
+        {
+            "buttons": [
+                {
+                    "label": "open",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.open as open; open.run()",
+                    "name": "open",
+                    "order": 1
+                },
+                {
+                    "label": "BuildShot",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.BuildShot as BuildShot; BuildShot.run()",
+                    "name": "BuildShot",
+                    "order": 2
+                },
+                {
+                    "label": "CreateWriteNode",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.CreateWriteNode as CreateWriteNode; CreateWriteNode.run()",
+                    "name": "CreateWriteNode",
+                    "order": 3
+                },
+                {
+                    "label": "VersionUp",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.VersionUp as VersionUp; VersionUp.run()",
+                    "name": "VersionUp",
+                    "order": 4
+                },
+                {
+                    "label": "Render Selected",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.RenderSelected as RenderSelected; RenderSelected.run()",
+                    "name": "RenderSelected",
+                    "order": 5
+                },
+                {
+                    "label": "CreateProxy",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.CreateProxy as CreateProxy; CreateProxy.run()",
+                    "name": "CreateProxy",
+                    "order": 6
+                },
+                {
+                    "label": "Version Up Selected",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.VersionUpSelected as VersionUpSelected; VersionUpSelected.run()",
+                    "name": "VersionUpSelected",
+                    "order": 7
+                },
+                {
+                    "label": "UpdateSeqShotPath",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.UpdateSeqShotPath as UpdateSeqShotPath; UpdateSeqShotPath.run()",
+                    "name": "UpdateSeqShotPath",
+                    "order": 8
+                },
+                {
+                    "label": "Review Selected",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.RequestReview as RequestReview; RequestReview.run()",
+                    "name": "RequestReview",
+                    "order": 9
+                },
+                {
+                    "label": "PublishCurrentFile",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.PublishCurrentFile as PublishCurrentFile; PublishCurrentFile.run()",
+                    "name": "PublishCurrentFile",
+                    "order": 10
+                },
+                {
+                    "label": "ReplacePaths",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.ReplacePaths as ReplacePaths; ReplacePaths.run()",
+                    "name": "ReplacePaths",
+                    "order": 11
+                },
+                {
+                    "label": "RefreshProxyPath",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.RefreshProxyPath as RefreshProxyPath; RefreshProxyPath.run()",
+                    "name": "RefreshProxyPath",
+                    "order": 12
+                },
+                {
+                    "label": "LoadPreviousVersion",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.LoadPreviousVersion as LoadPreviousVersion; LoadPreviousVersion.run()",
+                    "name": "LoadPreviousVersion",
+                    "order": 13
+                },
+                {
+                    "label": "Build",
+                    "module": "import cgl_tools.nuke.menus.Lumbermill.Build as Build; Build.run()",
+                    "name": "Build",
+                    "order": 14
+                }
+            ],
+            "name": "Lumbermill"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "ExportCamera",
+                    "module": "import cgl_tools.nuke.menus.3dTab.ExportCamera as ExportCamera; ExportCamera.run()",
+                    "name": "ExportCamera",
+                    "order": 1
+                }
+            ],
+            "name": "3dTab"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "ExportShotToFolder",
+                    "module": "import cgl_tools.nuke.menus.homeCoconut.ExportShotToFolder as ExportShotToFolder; ExportShotToFolder.run()",
+                    "name": "ExportShotToFolder",
+                    "order": 1
+                }
+            ],
+            "name": "homeCoconut"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "SetLut",
+                    "module": "import cgl_tools.nuke.menus.shotSetup.SetLut as SetLut; SetLut.run()",
+                    "name": "SetLut",
+                    "order": 1
+                },
+                {
+                    "label": "SetCompSize",
+                    "module": "import cgl_tools.nuke.menus.shotSetup.SetCompSize as SetCompSize; SetCompSize.run()",
+                    "name": "SetCompSize",
+                    "order": 2
+                },
+                {
+                    "label": "AcesSetup",
+                    "module": "import cgl_tools.nuke.menus.shotSetup.AcesSetup as AcesSetup; AcesSetup.run()",
+                    "name": "AcesSetup",
+                    "order": 3
+                }
+            ],
+            "name": "shotSetup"
+        }
+    ]
+}

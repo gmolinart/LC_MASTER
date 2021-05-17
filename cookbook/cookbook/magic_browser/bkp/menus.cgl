@@ -1,0 +1,12 @@
+{
+    "lumbermill": {
+        "Home Coconut": {
+            "TestMenuButton": {
+                "label": "TestMenuButton", 
+                "module": "import cgl_tools.lumbermill.menus.Home Coconut.TestMenuButton as TestMenuButton; TestMenuButton.run()", 
+                "order": 1
+            }, 
+            "order": 1
+        }
+    }
+}

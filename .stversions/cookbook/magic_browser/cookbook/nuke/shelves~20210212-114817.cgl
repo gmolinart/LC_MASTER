@@ -1,0 +1,13 @@
+{
+    "nuke": {
+        "testShelf": {
+            "Alberto": {
+                "icon": "Z:/COMPANIES/_config/cgl_tools/nuke/shelves/testShelf/icon_5xA_icon.ico", 
+                "label": "Alberto", 
+                "module": "import cgl_tools.nuke.shelves.testShelf.Alberto as Alberto; Alberto.run()", 
+                "order": 1
+            }, 
+            "order": 1
+        }
+    }
+}

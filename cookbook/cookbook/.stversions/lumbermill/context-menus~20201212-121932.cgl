@@ -1,0 +1,19 @@
+{
+    "lumbermill": {
+        "comp": {
+            "CreateExrProxy": {
+                "label": "Create Exr Proxy", 
+                "module": "import cgl_tools.lumbermill.context-menus.comp.CreateExrProxy as CreateExrProxy; CreateExrProxy.run()", 
+                "name": "CreateExrProxy", 
+                "order": 1
+            }, 
+            "TestMenu": {
+                "label": "TestMenu", 
+                "module": "import cgl_tools.lumbermill.context-menus.comp.TestMenu as TestMenu; TestMenu.run()", 
+                "name": "TestMenu", 
+                "order": 2
+            }, 
+            "order": 1
+        }
+    }
+}

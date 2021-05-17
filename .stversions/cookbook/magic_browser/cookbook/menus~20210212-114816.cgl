@@ -1,0 +1,12 @@
+{
+    "": {
+        "CGL_test": {
+            "order": 1, 
+            "test1": {
+                "label": "test1", 
+                "module": "import cgl_tools..menus.CGL_test.test1 as test1; test1.run()", 
+                "order": 1
+            }
+        }
+    }
+}

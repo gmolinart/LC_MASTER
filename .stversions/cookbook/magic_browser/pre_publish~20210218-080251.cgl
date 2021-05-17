@@ -1,0 +1,105 @@
+{
+    "magic_browser": [
+        {
+            "buttons": [
+                {
+                    "label": "Check Padding",
+                    "module": "cookbook.magic_browser.pre_publish.plate.CheckPadding",
+                    "name": "CheckPadding",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "Export Msd",
+                    "module": "cookbook.magic_browser.pre_publish.plate.ExportMsd",
+                    "name": "ExportMsd",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "Move Files To Render",
+                    "module": "cookbook.magic_browser.pre_publish.plate.MoveFilesToRender",
+                    "name": "MoveFilesToRender",
+                    "order": 3,
+                    "required": "True"
+                },
+                {
+                    "label": "Make Exr Proxy",
+                    "module": "cookbook.magic_browser.pre_publish.plate.MakeExrProxy",
+                    "name": "MakeExrProxy",
+                    "order": 4,
+                    "required": "True"
+                },
+                {
+                    "label": "Create Review",
+                    "module": "cookbook.magic_browser.pre_publish.plate.CreateReview",
+                    "name": "CreateReview",
+                    "order": 5,
+                    "required": "True"
+                },
+                {
+                    "label": "Check File Sequence",
+                    "module": "cookbook.magic_browser.pre_publish.plate.CheckFileSequence",
+                    "name": "CheckFileSequence",
+                    "order": 6,
+                    "required": "True"
+                },
+                {
+                    "label": "Publish Files",
+                    "module": "cookbook.magic_browser.pre_publish.plate.PublishFiles",
+                    "name": "PublishFiles",
+                    "order": 7,
+                    "required": "True"
+                }
+            ],
+            "name": "plate"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "Check Elem Name",
+                    "module": "cookbook.magic_browser.pre_publish.elem.CheckElemName",
+                    "name": "CheckElemName",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "Export Msd",
+                    "module": "cookbook.magic_browser.pre_publish.elem.ExportMsd",
+                    "name": "ExportMsd",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "Move Files To Render",
+                    "module": "cookbook.magic_browser.pre_publish.elem.MoveFilesToRender",
+                    "name": "MoveFilesToRender",
+                    "order": 3,
+                    "required": "True"
+                },
+                {
+                    "label": "Make Exr Proxy",
+                    "module": "cookbook.magic_browser.pre_publish.elem.MakeExrProxy",
+                    "name": "MakeExrProxy",
+                    "order": 4,
+                    "required": "True"
+                },
+                {
+                    "label": "Create Review",
+                    "module": "cookbook.magic_browser.pre_publish.elem.CreateReview",
+                    "name": "CreateReview",
+                    "order": 5,
+                    "required": "True"
+                },
+                {
+                    "label": "Publish Files",
+                    "module": "cookbook.magic_browser.pre_publish.elem.PublishFiles",
+                    "name": "PublishFiles",
+                    "order": 6,
+                    "required": "True"
+                }
+            ],
+            "name": "elem"
+        }
+    ]
+}

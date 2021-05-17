@@ -1,0 +1,43 @@
+{
+    "lumbermill": {
+        "File": {
+            "CopyDefaultFile": {
+                "label": "CopyDefaultFile",
+                "module": "import cgl_tools.lumbermill.menus.File.CopyDefaultFile as CopyDefaultFile; CopyDefaultFile.run()",
+                "name": "CopyDefaultFile",
+                "order": 2
+            },
+            "CorrectFileName": {
+                "label": "CorrectFileName",
+                "module": "import cgl_tools.lumbermill.menus.File.CorrectFileName as CorrectFileName; CorrectFileName.run()",
+                "name": "CorrectFileName",
+                "order": 1
+            },
+            "ForcePublish": {
+                "label": "ForcePublish",
+                "module": "import cgl_tools.lumbermill.menus.File.ForcePublish as ForcePublish; ForcePublish.run()",
+                "name": "ForcePublish",
+                "order": 3
+            },
+            "ImportTaskFrom_": {
+                "label": "ImportTaskFrom",
+                "module": "import cgl_tools.lumbermill.menus.File.ImportTaskFrom_ as ImportTaskFrom_; ImportTaskFrom_.run()",
+                "name": "ImportTaskFrom_",
+                "order": 6
+            },
+            "OpenPreview": {
+                "label": "OpenPreview",
+                "module": "import cgl_tools.lumbermill.menus.File.OpenPreview as OpenPreview; OpenPreview.run()",
+                "name": "OpenPreview",
+                "order": 4
+            },
+            "Proxy": {
+                "label": "Proxy",
+                "module": "import cgl_tools.lumbermill.menus.File.Proxy as Proxy; Proxy.run()",
+                "name": "Proxy",
+                "order": 5
+            },
+            "order": 1
+        }
+    }
+}

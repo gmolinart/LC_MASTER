@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "lone-coconut-syncthing",
+  "private_key_id": "0853eb66e60e36e7e8d2445adc1c8ac66c0b3b19",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC0Q4glvUtdFo9z\nbvOoy11fz/WKTnpOx+J6wvnh0NO4PJzYKrjxOeIdF96h0quk77Ow81VKOizk3sGY\nTUWoGe674gBhHWGFke7glJ43TFteb8vzb9/tWZ0M5yGVdxwDZ/InMHLIvyveXnxK\nV9r/UNzLn0yOJoyTpSnKYHaaMKq2gd9PHfwAPYSjJVJhDRye9EvSD1lWMnfgEgkx\ng7MLG0575Qn4IeNYmDDpVuImd4mkezAmCBpIhWC+P0YBLY/gr5iNGAAjMonCNqZa\nld7vjwP7zVp9EDmvTXKc8HBaNG2EJbAUeXpp2k+HUEV9xfO04QcMLGGzQJnXP1GH\nbZzSkvWdAgMBAAECggEAEmhfAR4+ZugZ3VDJgvAZaIz6PEBdTv7XCsWER4ylQh1h\nFYCaAtAas0aFDoNOfHjvIYpc/Z0eiSnncl+vAEZ9ps6iTp3LH/JSBrmbxSEqp2Rv\n2uZkDdRmgYh3WSWg77Fv/JPUSi7zZ4bAgcWiRbYtMIHjixSMAGZk88HmpUIuUeqZ\nhl+eubV0s1rC8lzXa/LBiDV86H6i1clRKZfNvxFukMs34+DzUVIPNwgKOXkSsxAt\nrf2cecBa3zGYf7k9I1/fjvG1Rbzl9M4yyvTyVmeAgKvCU3VTc6lL1R9lN4KY7Ob3\ntZF5SV5xpDgXWdPcwWOQqTMIwYfc/dpFveZs0y0Q5QKBgQD4a/qHy+Ksa4vzeU+S\ntvPA8AOpo3voPLq7OuzKy+6kYSUfJwypoBHpMb4VS4RyTr2JBXqNvIHRrweVC+kA\nGD8IaCMprn52cVslPv8OAaRs3b69XrrfPCrb6JmRzwUjqLIDv57QDMkd7Ys6JTzl\n6MmeDfXn8rNbllx/ACim7KRsWwKBgQC5w0f7QybX7mDiqxrr/on3V/PZs0QfLzMu\n5IkVwnn8vAgMaWLIIBXzHIX4V30z0LPYL6oUmRcOfx1IekhXWXfVag5el9AZ1IR0\n3GfUnRt0kY68KJx39LGpFoZ+ZIf0VJ11wzgSShqnjzjglRgSQBzKAs1SD/3gomha\nR92PqfSnZwKBgDPZ3dXgQXS5keGEzY4S77eyoSEURXWIz3Tq7Ke7fxkCScxBy0vQ\nZEynHES3mXJ+auMhqJ3S3cnVXaDHdp+Vb/qiOcymZjD0ohCZIIVc5GPwuLIwBpM3\nrL5vwzYC3tC9kkJkCZLlSEkd3rSJNzfJqeN6iHwcVUFllfLQJqwIsp0HAoGANa0o\nyoC/45sc4cJhWBnH0fHXI2u6XmxsFLuypNf6Gb5XcQaupXcoAISYbYcSRXujy+8R\n7TvDPswaMQwshRj0GHW5yzmAx0XyNDZPxk7TVR6OKO5vL/ZDs8EvgawY4M/mY9XS\nCO7ivtIStEpAl11xNCoVHAZE7LjhAF1Ntyp76DcCgYBARu0lCMrCb1kkran2+LTS\nqoUbYybmchJjTf1mNWm1f1Il0aTgnYlVgZbiyJLEzptZ+K1/GqwvAlQRsafc9Vb2\nsxaRplxw37PGRY1C4pxGX+fWeoa/bev7Aw8zNHY3G0BrUyrmul7TJPi8fy3dyNDb\nwqsNzVoqVqFxAtNp5Lh0TQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "lc-syncthing-credentials@lone-coconut-syncthing.iam.gserviceaccount.com",
+  "client_id": "113888067675259639981",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/lc-syncthing-credentials%40lone-coconut-syncthing.iam.gserviceaccount.com"
+}

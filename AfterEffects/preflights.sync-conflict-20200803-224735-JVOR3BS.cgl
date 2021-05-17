@@ -1,0 +1,31 @@
+{
+    "AfterEffects": {
+        "BiggAssVideo": {
+            "AssembleEdit": {
+                "label": "AssembleEdit", 
+                "module": "cgl_tools.AfterEffects.preflights.BiggAssVideo.AssembleEdit", 
+                "order": 4, 
+                "required": "True"
+            }, 
+            "AutoCuts": {
+                "label": "AutoCuts", 
+                "module": "cgl_tools.AfterEffects.preflights.BiggAssVideo.AutoCuts", 
+                "order": 2, 
+                "required": "True"
+            }, 
+            "CopyAndRename": {
+                "label": "CopyAndRename", 
+                "module": "cgl_tools.AfterEffects.preflights.BiggAssVideo.CopyAndRename", 
+                "order": 1, 
+                "required": "True"
+            }, 
+            "RenderAllCuts": {
+                "label": "RenderAllCuts", 
+                "module": "cgl_tools.AfterEffects.preflights.BiggAssVideo.RenderAllCuts", 
+                "order": 3, 
+                "required": "True"
+            }, 
+            "order": 1
+        }
+    }
+}

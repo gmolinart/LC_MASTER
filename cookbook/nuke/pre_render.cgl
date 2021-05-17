@@ -1,0 +1,15 @@
+{
+    "nuke": [
+        {
+            "buttons": [
+                {
+                    "label": "Test",
+                    "module": "cookbook.nuke.pre_render.comp.Test",
+                    "name": "Test",
+                    "order": 1
+                }
+            ],
+            "name": "comp"
+        }
+    ]
+}

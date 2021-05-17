@@ -1,0 +1,101 @@
+{
+    "lumbermill": [
+        {
+            "buttons": [
+                {
+                    "label": "CheckPublishedFiles",
+                    "module": "cgl_tools.lumbermill.preflights.plate.CheckPublishedFiles",
+                    "name": "CheckPublishedFiles",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "PublishFiles",
+                    "module": "cgl_tools.lumbermill.preflights.plate.PublishFiles",
+                    "name": "PublishFiles",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "Create Proxy",
+                    "module": "CreateProxy",
+                    "name": "CreateProxy",
+                    "order": 3,
+                    "required": "True"
+                },
+                {
+                    "label": "Create Proxy HD",
+                    "module": "CreateProxyHD",
+                    "name": "CreateProxyHD",
+                    "order": 4,
+                    "required": "True"
+                },
+                {
+                    "label": "Create Proxy Mov",
+                    "module": "CreateProxyMov",
+                    "name": "CreateProxyMov",
+                    "order": 5,
+                    "required": "True"
+                },
+                {
+                    "label": "Create Proxy Gif",
+                    "module": "CreateProxyGif",
+                    "name": "CreateProxyGif",
+                    "order": 6,
+                    "required": "True"
+                }
+            ],
+            "name": "plate"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "Check For Published Files",
+                    "module": "check_publish_files",
+                    "name": "check_publish_files",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "test",
+                    "module": "test",
+                    "name": "test",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "Publish Files",
+                    "module": "publish_files",
+                    "name": "publish_files",
+                    "order": 3,
+                    "required": "True"
+                }
+            ],
+            "name": "ref"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "PublishFiles",
+                    "module": "cgl_tools.lumbermill.preflights.default.PublishFiles",
+                    "name": "PublishFiles",
+                    "order": 1,
+                    "required": "True"
+                }
+            ],
+            "name": "default"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "Publish",
+                    "module": "cgl_tools.lumbermill.preflights.rig.Publish",
+                    "name": "Publish",
+                    "order": 1,
+                    "required": "True"
+                }
+            ],
+            "name": "rig"
+        }
+    ]
+}

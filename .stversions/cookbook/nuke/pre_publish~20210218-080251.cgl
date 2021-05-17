@@ -1,0 +1,131 @@
+{
+    "nuke": [
+        {
+            "buttons": [
+                {
+                    "label": "Check Lut In Scene",
+                    "module": "cookbook.nuke.pre_publish.lut.CheckLutInScene",
+                    "name": "CheckLutInScene",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "Publish Files",
+                    "module": "cookbook.nuke.pre_publish.lut.PublishFiles",
+                    "name": "PublishFiles",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "Move Source To Render",
+                    "module": "cookbook.nuke.pre_publish.lut.MoveSourceToRender",
+                    "name": "MoveSourceToRender",
+                    "order": 3,
+                    "required": "True"
+                }
+            ],
+            "name": "lut"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "Set Proxy Path",
+                    "module": "cookbook.nuke.pre_publish.key.SetProxyPath",
+                    "name": "SetProxyPath",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "Save File",
+                    "module": "cookbook.nuke.pre_publish.key.SaveFile",
+                    "name": "SaveFile",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "Render High",
+                    "module": "cookbook.nuke.pre_publish.key.RenderHigh",
+                    "name": "RenderHigh",
+                    "order": 3,
+                    "required": "True"
+                },
+                {
+                    "label": "Render Proxy",
+                    "module": "cookbook.nuke.pre_publish.key.RenderProxy",
+                    "name": "RenderProxy",
+                    "order": 4,
+                    "required": "True"
+                },
+                {
+                    "label": "Cleanup Task",
+                    "module": "cookbook.nuke.pre_publish.key.CleanupTask",
+                    "name": "CleanupTask",
+                    "order": 5,
+                    "required": "True"
+                },
+                {
+                    "label": "Save To Render",
+                    "module": "cookbook.nuke.pre_publish.key.SaveToRender",
+                    "name": "SaveToRender",
+                    "order": 6,
+                    "required": "True"
+                },
+                {
+                    "label": "Open Source",
+                    "module": "cookbook.nuke.pre_publish.key.OpenSource",
+                    "name": "OpenSource",
+                    "order": 7,
+                    "required": "True"
+                }
+            ],
+            "name": "key"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "Set Proxy Path",
+                    "module": "cookbook.nuke.pre_publish.key.SetProxyPath",
+                    "name": "SetProxyPath",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "Save File",
+                    "module": "cookbook.nuke.pre_publish.key.SaveFile",
+                    "name": "SaveFile",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "Render High",
+                    "module": "cookbook.nuke.pre_publish.key.RenderHigh",
+                    "name": "RenderHigh",
+                    "order": 3,
+                    "required": "True"
+                },
+                {
+                    "label": "Render Proxy",
+                    "module": "cookbook.nuke.pre_publish.key.RenderProxy",
+                    "name": "RenderProxy",
+                    "order": 4,
+                    "required": "True"
+                },
+                {
+                    "label": "Save To Render",
+                    "module": "cookbook.nuke.pre_publish.key.SaveToRender",
+                    "name": "SaveToRender",
+                    "order": 5,
+                    "required": "True"
+                },
+                {
+                    "label": "Open Source",
+                    "module": "cookbook.nuke.pre_publish.key.OpenSource",
+                    "name": "OpenSource",
+                    "order": 6,
+                    "required": "True"
+                }
+            ],
+            "name": "comp"
+        }
+    ]
+}

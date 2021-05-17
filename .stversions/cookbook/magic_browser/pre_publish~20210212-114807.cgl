@@ -1,0 +1,30 @@
+{
+    "magic_browser": [
+        {
+            "buttons": [
+                {
+                    "label": "Make Exr Proxy",
+                    "module": "cookbook.magic_browser.pre_publish.plate.MakeExrProxy",
+                    "name": "MakeExrProxy",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "Create Review",
+                    "module": "cookbook.magic_browser.pre_publish.plate.CreateReview",
+                    "name": "CreateReview",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "Publish Files",
+                    "module": "cookbook.magic_browser.pre_publish.plate.PublishFiles",
+                    "name": "PublishFiles",
+                    "order": 3,
+                    "required": "True"
+                }
+            ],
+            "name": "plate"
+        }
+    ]
+}

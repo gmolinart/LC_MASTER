@@ -1,0 +1,108 @@
+{
+    "nuke": [
+        {
+            "buttons": [
+                {
+                    "label": "open",
+                    "module": "import cookbook.nuke.menus.Alchemy.open as open; open.run()",
+                    "name": "open",
+                    "order": 1
+                },
+                {
+                    "label": "Build",
+                    "module": "import cookbook.nuke.menus.Alchemy.Build as Build; Build.run()",
+                    "name": "Build",
+                    "order": 2
+                },
+                {
+                    "label": "Pre Render",
+                    "module": "import cookbook.nuke.menus.Alchemy.PreRender as PreRender; PreRender.run()",
+                    "name": "PreRender",
+                    "order": 3
+                },
+                {
+                    "label": "CreateWriteNode",
+                    "module": "import cookbook.nuke.menus.Alchemy.CreateWriteNode as CreateWriteNode; CreateWriteNode.run()",
+                    "name": "CreateWriteNode",
+                    "order": 4
+                },
+                {
+                    "label": "VersionUp",
+                    "module": "import cookbook.nuke.menus.Alchemy.VersionUp as VersionUp; VersionUp.run()",
+                    "name": "VersionUp",
+                    "order": 5
+                },
+                {
+                    "label": "CreateProxy",
+                    "module": "import cookbook.nuke.menus.Alchemy.CreateProxy as CreateProxy; CreateProxy.run()",
+                    "name": "CreateProxy",
+                    "order": 6
+                },
+                {
+                    "label": "Version Up Selected",
+                    "module": "import cookbook.nuke.menus.Alchemy.VersionUpSelected as VersionUpSelected; VersionUpSelected.run()",
+                    "name": "VersionUpSelected",
+                    "order": 7
+                },
+                {
+                    "label": "Review Selected",
+                    "module": "import cookbook.nuke.menus.Alchemy.RequestReview as RequestReview; RequestReview.run()",
+                    "name": "RequestReview",
+                    "order": 8
+                }
+            ],
+            "name": "Alchemy"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "ExportCamera",
+                    "module": "import cookbook.nuke.menus.3dTab.ExportCamera as ExportCamera; ExportCamera.run()",
+                    "name": "ExportCamera",
+                    "order": 1
+                }
+            ],
+            "name": "3dTab"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "SetLut",
+                    "module": "import cookbook.nuke.menus.shotSetup.SetLut as SetLut; SetLut.run()",
+                    "name": "SetLut",
+                    "order": 1
+                },
+                {
+                    "label": "SetCompSize",
+                    "module": "import cookbook.nuke.menus.shotSetup.SetCompSize as SetCompSize; SetCompSize.run()",
+                    "name": "SetCompSize",
+                    "order": 2
+                },
+                {
+                    "label": "AcesSetup",
+                    "module": "import cookbook.nuke.menus.shotSetup.AcesSetup as AcesSetup; AcesSetup.run()",
+                    "name": "AcesSetup",
+                    "order": 3
+                }
+            ],
+            "name": "shotSetup"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "Export To Elem",
+                    "module": "import cookbook.nuke.menus.comp.ExportToElem as ExportToElem; ExportToElem.run()",
+                    "name": "ExportToElem",
+                    "order": 1
+                },
+                {
+                    "label": "Set Comp Settings",
+                    "module": "import cookbook.nuke.menus.comp.SetCompSettings as SetCompSettings; SetCompSettings.run()",
+                    "name": "SetCompSettings",
+                    "order": 2
+                }
+            ],
+            "name": "comp"
+        }
+    ]
+}

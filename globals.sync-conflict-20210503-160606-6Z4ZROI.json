@@ -1,0 +1,1000 @@
+{
+    "account_info": {
+        "aws_company_name": "lone-coconut",
+        "aws_globals_path": "https://lone-coconut.s3.amazonaws.com/globals.json",
+        "default_company": "",
+        "globals_path": "D:\\COMPANIES\\_config\\globals.json",
+        "project_management": "ftrack"
+    },
+    "asset_categories": {
+        "Character": "char",
+        "Environment": "env",
+        "Library": "lib",
+        "Production": "prod",
+        "Prop": "prop",
+        "Vehicle": "veh"
+    },
+    "asset_category_long_list": [
+        "Prop",
+        "Environment",
+        "Vehicle",
+        "Character",
+        "Production",
+        "Library"
+    ],
+    "cg_lumberjack_dir": "D:\\COMPANIES\\_config",
+    "default": {
+        "frame_rate": 24,
+        "linear_gamma": 2.2,
+        "output_colorspace": "rec709",
+        "padding": 4,
+        "proxy_resolution": {
+            "EPDLUC": "1440x540",
+            "MENUDO_CGL": "1920x1013",
+            "cgl_tomtest": "1440x1080",
+            "default": "1920x1080"
+        },
+        "resolution": {
+            "full": "1920x1080",
+            "half": "960x540",
+            "image_review": "1920x1080",
+            "maya_icon": "24x24",
+            "quarter": "480x270",
+            "retina_icon": "48x48",
+            "third": "640x360",
+            "thumb": "200x200",
+            "thumb_cine": "200x112",
+            "video_review": "1920x1080"
+        },
+        "reviews": "t5h0j5z4q3q2b9h5@fsu-cmpa.slack.com",
+        "start_frame": 1001,
+        "working_colorspace": "linear"
+    },
+    "default_files": {
+        "anim": {
+            "ext": "blend",
+            "software": "blender"
+        },
+        "comp": {
+            "ext": "nk",
+            "software": "nuke"
+        },
+        "dnoise": {
+            "ext": "nk",
+            "software": "nuke"
+        },
+        "grmnt": {
+            "ext": "Zprj",
+            "software": "marvelous"
+        },
+        "key": {
+            "ext": "nk",
+            "software": "nuke"
+        },
+        "lay": {
+            "ext": "blend",
+            "software": "blender"
+        },
+        "lite": {
+            "ext": "blend",
+            "software": "blender"
+        },
+        "mdl": {
+            "ext": "blend",
+            "software": "blender"
+        },
+        "noise": {
+            "ext": "nk",
+            "software": "nuke"
+        },
+        "prev": {
+            "ext": "blend",
+            "software": "blender"
+        },
+        "remsh": {
+            "ext": "wrap",
+            "software": "marvelous"
+        },
+        "shd": {
+            "ext": "blend",
+            "software": "blender"
+        }
+    },
+    "definitions": {
+        "ingest_browser_header": [
+            "Filename",
+            "Filepath",
+            "Filetype",
+            "Frame_Range",
+            "Tags",
+            "Keep_Client_Naming",
+            "Scope",
+            "Seq",
+            "Shot",
+            "Task",
+            "Publish_Filepath",
+            "Publish_Date",
+            "Status",
+            "Parent"
+        ]
+    },
+    "dvp": {
+        "frame_rate": 24
+    },
+    "email": {
+        "bcc": "tom@cglumberjack.com",
+        "bugs": "c5r2y1k1t5h5o4l9@fsu-cmpa.slack.com",
+        "from": "tom@cglumberjack.com",
+        "lj_domain": "https://api.mailgun.net/v3/cglumberjack.com/messages",
+        "mailgun_key": "key-3714d0480ab5669b65dc08b8a59c49f7",
+        "reviews": "t5h0j5z4q3q2b9h5@fsu-cmpa.slack.com"
+    },
+    "ext_map": {
+        ".ai": "image",
+        ".ari": "image",
+        ".avi": "movie",
+        ".bmp": "image",
+        ".dpx": "image",
+        ".exr": "image",
+        ".gif": "image",
+        ".hdr": "image",
+        ".ico": "image",
+        ".jpeg": "image",
+        ".jpg": "image",
+        ".mlv": "movie",
+        ".mov": "movie",
+        ".mp4": "movie",
+        ".mpg": "movie",
+        ".pdf": "pdf",
+        ".png": "image",
+        ".pnm": "image",
+        ".ppt": "ppt",
+        ".pptx": "ppt",
+        ".psd": "image",
+        ".qt": "movie",
+        ".tex": "image",
+        ".tif": "image",
+        ".tiff": "image",
+        ".tx": "image",
+        ".xbm": "image"
+    },
+    "helpdesk": {
+        "asana_api": "1/1146099184455660:7008b15811cd516eee5036d805c3f3a6",
+        "help_menu": ""
+    },
+    "layout": {
+        "asset": {
+            "frame_end": "",
+            "frame_start": "",
+            "handle_end": "",
+            "handle_start": "",
+            "layout_group": "",
+            "name": "",
+            "published_from": "",
+            "rig_root": "",
+            "rotate": "",
+            "scale": "",
+            "source_path": "",
+            "task": "",
+            "transform": "",
+            "translate": "",
+            "type": ""
+        }
+    },
+    "logging": {
+        "debug": {
+            "format": "%(asctime)-15s  %(levelname)s %(message)s \"%(pathname)s:%(lineno)d\""
+        },
+        "format": "%(asctime)-15s  %(levelname)s %(message)s \"%(pathname)s:%(lineno)d\"",
+        "level": "info"
+    },
+    "lumberjack_sync": {
+        "AWS_ACCESS_KEY_ID": "AKIAJ4HU6QEBIGKH7DRQ",
+        "AWS_SECRET_ACCESS_KEY": "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"
+    },
+    "project_management": {
+        "ftrack": {
+            "api": {
+                "api_key": "ZTU3ZDZkMDUtMWI3OS00ZWU1LWE2NGItZGJiYmQyOGExZTZiOjoyMTUyYmI2ZC1kNzk2LTRmZmUtYjUzZS0wMjBiMzA5MGZhMDA",
+                "api_user": "LoneCoconutMail@gmail.com",
+                "bid_metric": "days",
+                "daily_hours": 10,
+                "default_schema": "VFX",
+                "project_creation_asset_id": "asset",
+                "project_creation_headers": [
+                    "scope",
+                    "seq",
+                    "shot",
+                    "description",
+                    "ftrack_task",
+                    "bid hours"
+                ],
+                "project_creation_shot_id": "shot",
+                "server_url": "https://lone-coconut.ftrackapp.com"
+            },
+            "tasks": {
+                "ANIMATION": {
+                    "long_to_short": {
+                        "assets": {
+                            "Bundle": "bndl",
+                            "Character Design": "dsgn",
+                            "Concept Art": "cncpt",
+                            "Garment": "grmt",
+                            "Lookdev": "ldev",
+                            "Modeling": "mdl",
+                            "Presentacion": "pres",
+                            "Prop Design": "pdes",
+                            "Reference": "ref",
+                            "Remesh": "remsh",
+                            "Rigging": "rig",
+                            "SHADING": "shd",
+                            "TEXTURING": "tex"
+                        },
+                        "shots": {
+                            "Animation": "anim",
+                            "Audio": "audio",
+                            "Background 2d": "bg",
+                            "Bundle": "bndl",
+                            "Camera": "cam",
+                            "Cleanup 2d": "clean",
+                            "Color": "col",
+                            "Color 2d": "col2d",
+                            "Compositing": "comp",
+                            "Concept Art": "cncpt",
+                            "Environment": "env",
+                            "Export": "exp",
+                            "Fx": "fx",
+                            "Layout": "lay",
+                            "Lighting": "light",
+                            "Lut": "lut",
+                            "Paint and Cleanup": "paint",
+                            "Previz": "prev",
+                            "Reference": "ref",
+                            "Rough Anim": "ranim",
+                            "Storyboard": "stry"
+                        }
+                    },
+                    "short_to_long": {
+                        "assets": {
+                            "bndl": "Bundle",
+                            "cncpt": "Concept Art",
+                            "dsgn": "Character Design",
+                            "grmt": "Garment",
+                            "ldev": "Lookdev",
+                            "mdl": "Modeling",
+                            "pdes": "Prop Design",
+                            "pres": "Presentacion",
+                            "ref": "Reference",
+                            "remsh": "Remesh",
+                            "rig": "Rigging",
+                            "shd": "SHADING",
+                            "tex": "TEXTURING"
+                        },
+                        "shots": {
+                            "Audio": "audio",
+                            "anim": "Animation",
+                            "bg": "Background 2d",
+                            "bndl": "Bundle",
+                            "cam": "Camera",
+                            "clean": "Cleanup 2d",
+                            "cncpt": "Concept Art",
+                            "col": "Color",
+                            "col2d": "Color 2d",
+                            "comp": "Compositing",
+                            "env": "Environment",
+                            "exp": "Export",
+                            "fx": "Fx",
+                            "lay": "Layout",
+                            "light": "Lighting",
+                            "lut": "Lut",
+                            "paint": "Paint and Cleanup",
+                            "prev": "Previz",
+                            "ranim": "Rough Anim",
+                            "ref": "Reference",
+                            "stry": "Storyboard"
+                        }
+                    }
+                },
+                "Development": {
+                    "long_to_short": {
+                        "shots": {
+                            "Bug": "bug",
+                            "Documentation": "docu",
+                            "Feature": "feat",
+                            "Improvement": "imp",
+                            "Refactor": "refact",
+                            "Research": "rsrch",
+                            "Test": "tst"
+                        }
+                    },
+                    "short_to_long": {
+                        "shots": {
+                            "bug": "Bug",
+                            "docu": "Documentation",
+                            "feat": "Feature",
+                            "imp": "Improvement",
+                            "refact": "Refactor",
+                            "rsrch": "Research",
+                            "tst": "Test"
+                        }
+                    }
+                },
+                "Generic": {
+                    "long_to_short": {
+                        "shots": {
+                            "Deliverable": "deliv",
+                            "Digital Debree": "deb",
+                            "Generic": "gen",
+                            "Remove Crew": "rcrew",
+                            "Rig Removal": "rrem",
+                            "Set Extension": "sext",
+                            "Wire Removal": "wrem"
+                        }
+                    },
+                    "short_to_long": {
+                        "shots": {
+                            "deb": "Digital Debree",
+                            "deliv": "Deliverable",
+                            "gen": "Generic",
+                            "rcrew": "Remove Crew",
+                            "rrem": "Rig Removal",
+                            "sext": "Set Extension",
+                            "wrem": "Wire Removal"
+                        }
+                    }
+                },
+                "PRODUCCION": {
+                    "long_to_short": {
+                        "assets": {
+                            "Lookdev": "ldev",
+                            "Presentacion": "pres"
+                        },
+                        "shots": {
+                            "Deliverable": "deliv",
+                            "Documentation": "docu",
+                            "Editing": "edit",
+                            "Export": "exp",
+                            "Improvement": "imp",
+                            "Modeling": "mdl",
+                            "Production": "prod",
+                            "Research": "rsrch",
+                            "Storyboard": "stry",
+                            "Test": "tst"
+                        }
+                    },
+                    "short_to_long": {
+                        "assets": {
+                            "ldev": "Lookdev",
+                            "pres": "Presentacion"
+                        },
+                        "shots": {
+                            "deliv": "Deliverable",
+                            "docu": "Documentation",
+                            "edit": "Editing",
+                            "exp": "Export",
+                            "imp": "Improvement",
+                            "prod": "Production",
+                            "rsrch": "Research",
+                            "stry": "Storyboard",
+                            "tst": "Test"
+                        }
+                    }
+                },
+                "VFX": {
+                    "long_to_short": {
+                        "assets": {
+                            "Bundle": "bndl",
+                            "Color": "clr",
+                            "Garment": "grmt",
+                            "HDRI": "hdri",
+                            "Lookdev": "ldev",
+                            "Modeling": "mdl",
+                            "Reference": "ref",
+                            "Remesh": "remsh",
+                            "Rigging": "rig",
+                            "SHADING": "shd",
+                            "TEXTURING": "tex"
+                        },
+                        "shots": {
+                            "Animation": "anim",
+                            "Audio": "audio",
+                            "Bundle": "bndl",
+                            "Camera": "cam",
+                            "Color": "col",
+                            "Compositing": "comp",
+                            "Concept Art": "cncpt",
+                            "Deliverable": "deliv",
+                            "Digital Debree": "deb",
+                            "Digital Element": "elem",
+                            "Editing": "edit",
+                            "Elem": "elem",
+                            "Export": "exp",
+                            "Fx": "fx",
+                            "Generic": "gen",
+                            "HDRI": "hdri",
+                            "Image Sequence": "imgs",
+                            "Key": "key",
+                            "Layout": "lay",
+                            "Lighting": "light",
+                            "Lut": "lut",
+                            "Matte Painting": "matte",
+                            "Modeling": "mdl",
+                            "Plate": "plate",
+                            "Previz": "prev",
+                            "Production": "prod",
+                            "Reference": "ref",
+                            "Remove Crew": "rcrew",
+                            "Render": "rnd",
+                            "Rig Removal": "rrem",
+                            "Rotoscoping": "roto",
+                            "Set Extension": "sext",
+                            "Storyboard": "stry",
+                            "Tracking": "track",
+                            "Wire Removal": "wrem"
+                        }
+                    },
+                    "short_to_long": {
+                        "assets": {
+                            "bndl": "Bundle",
+                            "clr": "Color",
+                            "grmt": "Garment",
+                            "hdri": "HDRI",
+                            "ldev": "Lookdev",
+                            "mdl": "Modeling",
+                            "ref": "Reference",
+                            "remsh": "Remesh",
+                            "rig": "Rigging",
+                            "shd": "SHADING",
+                            "tex": "TEXTURING"
+                        },
+                        "shots": {
+                            "anim": "Animation",
+                            "audio": "Audio",
+                            "bndl": "Bundle",
+                            "cam": "Camera",
+                            "cncpt": "Concept Art",
+                            "col": "Color",
+                            "comp": "Compositing",
+                            "deb": "Digital Debree",
+                            "deliv": "Deliverable",
+                            "edit": "Editing",
+                            "elem": "Digital Element",
+                            "exp": "Export",
+                            "fx": "Fx",
+                            "gen": "Generic",
+                            "hdri": "HDRI",
+                            "imgs": "Image Sequence",
+                            "key": "Key",
+                            "lay": "Layout",
+                            "light": "Lighting",
+                            "lut": "Lut",
+                            "matte": "Matte Painting",
+                            "mdl": "Modeling",
+                            "plate": "Plate",
+                            "prev": "Previz",
+                            "prod": "Production",
+                            "rcrew": "Remove Crew",
+                            "ref": "Reference",
+                            "rnd": "Render",
+                            "roto": "Rotoscoping",
+                            "rrem": "Rig Removal",
+                            "sext": "Set Extension",
+                            "stry": "Storyboard",
+                            "track": "Tracking",
+                            "wrem": "Wire Removal"
+                        }
+                    }
+                }
+            },
+            "user_details": [
+                "login",
+                "email",
+                "first",
+                "last"
+            ],
+            "users": {
+                "administrator": {
+                    "email": "",
+                    "first": "Admin",
+                    "last": "Coconut",
+                    "login": "lonecoconutmail@gmail.com"
+                },
+                "alpha": {
+                    "email": "info@lonecoconut.com",
+                    "first": "alpha",
+                    "last": "",
+                    "login": "info@lonecoconut.com",
+                    "phone": ""
+                },
+                "antonella": {
+                    "email": "info@lonecoconut.com",
+                    "first": "Antonella",
+                    "last": "Bosiak",
+                    "login": "info@lonecoconut.com"
+                },
+                "apolo": {
+                    "email": "",
+                    "first": "apolo",
+                    "last": "",
+                    "login": "LoneCoconutMail@gmail.com"
+                },
+                "arbin": {
+                    "email": "Arbin@lonecoconut.com",
+                    "first": "Arbin",
+                    "last": "De Los Santos",
+                    "login": "Arbin@lonecoconut.com",
+                    "phone": ""
+                },
+                "ares": {
+                    "email": "info@lonecoconut.com",
+                    "first": "ares",
+                    "last": "",
+                    "login": "info@lonecoconut.com",
+                    "phone": ""
+                },
+                "argenis": {
+                    "email": "Argenis@lonecoconut.com",
+                    "first": "Argenis",
+                    "last": "Santos",
+                    "login": "Argenis@lonecoconut.com"
+                },
+                "arlina": {
+                    "email": "arliinapaula@gmail.com",
+                    "first": "Arlina",
+                    "last": "",
+                    "login": "info@lonecoconut.com"
+                },
+                "asus": {
+                    "email": "info@lonecoconut.com",
+                    "first": "arlina",
+                    "last": "paula",
+                    "login": "info@lonecoconut.com"
+                },
+                "c0nvexo": {
+                    "email": "info@lonecoconut.com",
+                    "first": "Jose",
+                    "last": "Carlos",
+                    "login": "info@lonecoconut.com"
+                },
+                "cyclops": {
+                    "email": "info@lonecoconut.com",
+                    "first": "cyclops",
+                    "last": "",
+                    "login": "info@lonecoconut.com"
+                },
+                "dwarf_syndrome": {
+                    "email": "",
+                    "first": "dwarf",
+                    "last": "syndrome",
+                    "login": "LoneCoconutMail@gmail.com"
+                },
+                "edgardgpu": {
+                    "email": "info@lonecoconut.com",
+                    "first": "Edgard",
+                    "last": "Caliman",
+                    "login": "info@lonecoconut.com"
+                },
+                "ever": {
+                    "email": "Ever@lonecoconut.com",
+                    "first": "Ever",
+                    "last": "Ryan",
+                    "login": "Ever@lonecoconut.com"
+                },
+                "guillermo": {
+                    "email": "guillermo@lonecoconut.com",
+                    "first": "Guillermo",
+                    "last": "Molina",
+                    "login": "guillermo@lonecoconut.com"
+                },
+                "hefesto": {
+                    "email": "info@lonecoconut.com",
+                    "first": "hefesto",
+                    "last": "",
+                    "login": "info@lonecoconut.com",
+                    "phone": ""
+                },
+                "hera": {
+                    "email": "info@lonecoconut.com",
+                    "first": "hera",
+                    "last": "",
+                    "login": "info@lonecoconut.com",
+                    "phone": ""
+                },
+                "iris": {
+                    "email": "info@lonecoconut.com",
+                    "first": "iris",
+                    "last": "",
+                    "login": "info@lonecoconut.com",
+                    "phone": ""
+                },
+                "jose carlos": {
+                    "email": "info@lonecoconut.com",
+                    "first": "Jose Carlos",
+                    "last": "Marte",
+                    "login": "info@lonecoconut.com"
+                },
+                "josecarlos": {
+                    "email": "info@lonecoconut.com",
+                    "first": "Jose",
+                    "last": "Carlos",
+                    "login": "info@lonecoconut.com"
+                },
+                "juanCarlos": {
+                    "email": "info@lonecoconut.com",
+                    "first": "Juan Carlos",
+                    "last": "",
+                    "login": "info@lonecoconut.com"
+                },
+                "kratos": {
+                    "email": "info@lonecoconut.com",
+                    "first": "kratos",
+                    "last": "",
+                    "login": "info@lonecoconut.com",
+                    "phone": ""
+                },
+                "kuro": {
+                    "email": "info@lonecoconut.com",
+                    "first": "Lone",
+                    "last": "Coconut",
+                    "login": "info@lonecoconut.com"
+                },
+                "lonecoconut": {
+                    "email": "info@lonecoconut.com",
+                    "first": "Lone",
+                    "last": "Coconut",
+                    "login": "info@lonecoconut.com"
+                },
+                "maito": {
+                    "email": "info@lonecoconut.com",
+                    "first": "JuanCarlos",
+                    "last": "Gomez",
+                    "login": "info@lonecoconut.com"
+                },
+                "persefone": {
+                    "email": "",
+                    "first": "Lone",
+                    "last": "Coconut",
+                    "login": "lonecoconutmail@gmail.com"
+                },
+                "poseidon": {
+                    "email": "info@lonecocount.com",
+                    "first": "poseidon",
+                    "last": "poseidon",
+                    "login": "info@lonecoconut.com"
+                },
+                "ramon": {
+                    "email": "Ramon@lonecoconut.com",
+                    "first": "Ramon",
+                    "last": "Monsanto",
+                    "login": "Ramon@lonecoconut.com"
+                },
+                "ricardo": {
+                    "email": "ricardo@lonecoconut.com",
+                    "first": "Ricardo",
+                    "last": "",
+                    "login": "ricardo@lonecoconut.com"
+                },
+                "tmiko": {
+                    "email": "",
+                    "first": "Tom",
+                    "last": "Mikota",
+                    "login": "LoneCoconutMail@gmail.com"
+                },
+                "welinthon": {
+                    "email": "Welinthon@lonecoconut.com",
+                    "first": "Welinthon",
+                    "last": "Simeon",
+                    "login": "Welinthon@lonecoconut.com"
+                },
+                "zeus": {
+                    "email": "guillermo@lonecoconut.com",
+                    "first": "guillermo",
+                    "last": "molina",
+                    "login": "guillermo@lonecoconut.com"
+                }
+            }
+        },
+        "lumbermill": {
+            "api": {
+                "default_schema": "DEFAULT"
+            },
+            "tasks": {
+                "DEFAULT": {
+                    "long_to_short": {
+                        "assets": {
+                            "Cloth": "cloth",
+                            "Fur": "fur",
+                            "Modeling": "mdl",
+                            "Reference": "ref",
+                            "Rigging": "rig",
+                            "Shading": "shd",
+                            "Textures": "tex"
+                        },
+                        "shots": {
+                            "Animation": "anim",
+                            "Audio": "audio",
+                            "Bundle": "bndl",
+                            "Camera": "cam",
+                            "Color": "color",
+                            "Compositing": "comp",
+                            "Editing": "edit",
+                            "Element": "elem",
+                            "Fx": "fx",
+                            "Lighting": "light",
+                            "Lut": "lut",
+                            "Matte Painting": "matte",
+                            "Plate": "plate",
+                            "Previs": "prev",
+                            "Production": "prod",
+                            "Reference": "ref",
+                            "Storyboard": "story",
+                            "Tracking": "track",
+                            "lay": "Layout"
+                        }
+                    },
+                    "short_to_long": {
+                        "assets": {
+                            "cloth": "Cloth",
+                            "fur": "Fur",
+                            "mdl": "Modeling",
+                            "ref": "Reference",
+                            "rig": "Rigging",
+                            "shd": "Shading",
+                            "tex": "Textures"
+                        },
+                        "shots": {
+                            "anim": "Animation",
+                            "audio": "Audio",
+                            "bndl": "Bundle",
+                            "cam": "Camera",
+                            "color": "Color",
+                            "comp": "Compositing",
+                            "edit": "Editing",
+                            "elem": "Element",
+                            "fx": "Fx",
+                            "lay": "Layout",
+                            "light": "Lighting",
+                            "lut": "Lut",
+                            "matte": "Matte Painting",
+                            "plate": "Plate",
+                            "prev": "Previs",
+                            "prod": "Production",
+                            "ref": "Reference",
+                            "rnd": "Render",
+                            "story": "Storyboard",
+                            "track": "Tracking"
+                        }
+                    }
+                }
+            }
+        },
+        "shotgun": {
+            "api": {
+                "api_key": "bc29cd2fd4ce9fe3c2598c4d559b09f88eaa95b05edfd12a834a23aea0797e2f",
+                "api_script": "core_tools",
+                "api_user": "tmikota",
+                "concurrent": 4,
+                "concurrent_low": 0,
+                "notes": "ensure short codes exist for all pipeline steps in shotgun, might want a wizard for this.",
+                "project_short_name": "sg_code",
+                "server_url": "https://fsuada.shotgunstudio.com"
+            },
+            "tasks": {}
+        }
+    },
+    "rules": {
+        "context_list": [
+            "render",
+            "source",
+            "unity",
+            "unreal"
+        ],
+        "general": {
+            "file_sequence": {
+                "regex": "\\.[0-9]+\\."
+            },
+            "model_geo": {
+                "example": "Example Geo Names: wood, wood2, wood22, wood222, wood2222, wood22222",
+                "regex": "^[a-zA-Z]{3,}[0-9]{0,5}$"
+            },
+            "model_material": {
+                "example": "Example Mat names: wood_mtl",
+                "regex": "^[a-zA-Z]{3,}[A-Z]?_mtl$"
+            },
+            "shot_cam": {
+                "example": "Example Shot Cam: cam010_0200",
+                "regex": "^cam[0-9]{3}_[0-9]{4}$"
+            },
+            "taskname": {
+                "example": "eg: animation, anim",
+                "regex": "[a-z]{3,9}$"
+            },
+            "texture_channel": {
+                "example": "Example Texture Channel: diffuse",
+                "regex": "^[A-Za-z]+$"
+            },
+            "valid_chars": {
+                "regex": "[^a-zA-Z0-9._#]"
+            },
+            "valid_sequence": {
+                "regex": "[aA-zZ]+(\\.|\\_|\\-)[0-9]{2,4}\\."
+            }
+        },
+        "ignore": {
+            "contains": [
+                "cgl_info.json",
+                "_config",
+                "publish_data.csv",
+                ".preview",
+                ".thumb",
+                ".st_folder"
+            ],
+            "endswith": [],
+            "matches": []
+        },
+        "path_variables": {
+            "aov": {
+                "regex": "[A-Za-z0-9]+"
+            },
+            "asset": {
+                "example": "examples:\n\tkingkong - [creates single asset 'kingkong' in 'default' category]\n\tkingkong, trex [creates 2 assets in 'default' category]\n\tProp:kingkong [creates kingkong in 'Prop' category]\n\tProp:kingkong, trex [creates multiple assets in 'Prop' category]",
+                "regex": "[a-zA-Z]{3,}$"
+            },
+            "assetname": {
+                "example": "",
+                "regex": "[a-zA-Z_]+$"
+            },
+            "branch": {
+                "regex": "[a-z]+"
+            },
+            "cam": {
+                "regex": "[A-Za-z0-9]+"
+            },
+            "company": {
+                "example": "Company name rules:\n    Underscores are ok ('_')\n    Letters of the alphabet (a-z, A-Z)\n    Must Contain 3 or more characters",
+                "regex": "[A-Za-z_]{3,}$"
+            },
+            "context": {
+                "example": "examples: source, render",
+                "regex": "[a-z]+"
+            },
+            "date": {
+                "regex": "[0-9_]+"
+            },
+            "ext": {
+                "regex": "[a-z]{2,5}"
+            },
+            "filename": {
+                "regex": "\\w+"
+            },
+            "filename_base": {
+                "regex": "\\w+"
+            },
+            "frame": {
+                "regex": "[0-9]{4}"
+            },
+            "frame_padding": {
+                "regex": "\\.####"
+            },
+            "ingest_source": {
+                "regex": "[A-Za-z0-9_]+"
+            },
+            "major_version": {
+                "regex": "[0-9]{3}"
+            },
+            "minor_version": {
+                "regex": "[0-9]{3}"
+            },
+            "project": {
+                "example": "Project name rules:\n    Underscores are ok ('_')\n    Letters of the alphabet (a-z, A-Z)\n    Must Contain 3 or more characters",
+                "regex": "[A-Za-z_]{3,}$"
+            },
+            "render_pass": {
+                "regex": "[A-Za-z0-9]+"
+            },
+            "resolution": {
+                "regex": "[A-Za-z0-9]+"
+            },
+            "root": {
+                "regex": "[A-Za-z0-9_\\:]+"
+            },
+            "scope": {
+                "example": "examples: assets, shots",
+                "regex": "[a-z]+"
+            },
+            "seq": {
+                "example": "examples: 000, 010, 020",
+                "length": 3,
+                "regex": "^[0-9]{3}$|^[A-Z]{3}$"
+            },
+            "shot": {
+                "length": 4,
+                "regex": "^[0-9]{3,4}$"
+            },
+            "shotname": {
+                "example": "eg: 050_0100, THC_0500 (SEQ_SHOT)",
+                "regex": "[A-Z0-9]{3}\\_[0-9]{4}$"
+            },
+            "task": {
+                "regex": "[a-z]+"
+            },
+            "type": {
+                "regex": "[a-zA-Z]+"
+            },
+            "user": {
+                "regex": "[a-z]+"
+            },
+            "user_email": {
+                "regex": "[A-Za-z0-9]+"
+            },
+            "variant": {
+                "regex": "[a-z]+"
+            },
+            "version": {
+                "regex": "[0-9]{3,5}"
+            }
+        },
+        "scope_list": [
+            "assets",
+            "shots",
+            "IO"
+        ]
+    },
+    "sync": {
+        "syncthing": {
+            "aws_bucket_url": "https://lone-coconut.s3.amazonaws.com/sync_thing",
+            "sheets_config_path": "D:\\COMPANIES\\master\\config\\master\\client.json",
+            "sheets_name": "LONE_COCONUT_SYNC_THING",
+            "sync_thing_url": "https://lone-coconut.s3.amazonaws.com/sync_thing/lone-coconut-syncthing-0853eb66e60e.json"
+        }
+    },
+    "templates": {
+        "IO": {
+            "render": {
+                "path": "{company}/render/{project}/IO/{ingest_source}",
+                "version": "{version}"
+            },
+            "source": {
+                "path": "{company}/source/{project}/IO/{ingest_source}",
+                "version": "{version}"
+            }
+        },
+        "assets": {
+            "render": {
+                "file": "/{filename}.{ext}",
+                "path": "{company}/render/{project}/{branch}/assets/{type}/{asset}/{task}/{variant}/{user}",
+                "version": "{version}/{resolution}/{filename}.{ext}"
+            },
+            "source": {
+                "path": "{company}/source/{project}/{branch}/assets/{type}/{asset}/{task}/{variant}/{user}",
+                "version": "{version}/{resolution}/{filename}.{ext}"
+            },
+            "unity": {
+                "path": "{company}/unity/{project}/Assets/{seq}/{shot}/{task}",
+                "version": "{filename}.{ext}"
+            }
+        },
+        "path_template": [
+            "company",
+            "context",
+            "project",
+            "branch",
+            "scope"
+        ],
+        "shots": {
+            "render": {
+                "file": "{cam}/{render_pass}/{aov}/{seq}_{shot}_{aov}{frame_padding}.{ext}",
+                "path": "{company}/render/{project}/{branch}/shots/{seq}/{shot}/{task}/{variant}/{user}",
+                "version": "{version}/{resolution}/{filename}.{ext}"
+            },
+            "source": {
+                "path": "{company}/source/{project}/{branch}/shots/{seq}/{shot}/{task}/{variant}/{user}",
+                "version": "{version}/{resolution}/{filename}.{ext}"
+            },
+            "unity": {
+                "path": "{company}/unity/{project}/Assets/{seq}/{shot}/{task}",
+                "version": "{filename}.{ext}"
+            }
+        }
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "houdini": [
+        {
+            "buttons": [
+                {
+                    "icon": "",
+                    "label": "Version Up",
+                    "module": "import cgl_tools.houdini.shelves.magicbrowser.VersionUp as VersionUp; VersionUp.run()",
+                    "name": "VersionUp",
+                    "order": 1
+                },
+                {
+                    "icon": "",
+                    "label": "Turntable",
+                    "module": "import cgl_tools.houdini.shelves.magicbrowser.Turntable as Turntable; Turntable.run()",
+                    "name": "Turntable",
+                    "order": 2
+                },
+                {
+                    "icon": "",
+                    "label": "Delete Turntable",
+                    "module": "import cgl_tools.houdini.shelves.magicbrowser.DeleteTurntable as DeleteTurntable; DeleteTurntable.run()",
+                    "name": "DeleteTurntable",
+                    "order": 3
+                },
+                {
+                    "icon": "",
+                    "label": "Launch",
+                    "module": "import cgl_tools.houdini.shelves.magicbrowser.Launch as Launch; Launch.run()",
+                    "name": "Launch",
+                    "order": 4
+                }
+            ],
+            "name": "magicbrowser"
+        }
+    ]
+}

@@ -1,0 +1,118 @@
+{
+    "nuke": {
+        "3dTab": {
+            "ExportCamera": {
+                "label": "ExportCamera", 
+                "module": "import cgl_tools.nuke.menus.3dTab.ExportCamera as ExportCamera; ExportCamera.run()", 
+                "name": "ExportCamera", 
+                "order": 1
+            }, 
+            "order": 2
+        }, 
+        "Lumbermill": {
+            "BuildShot": {
+                "label": "Build Shot", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.BuildShot as BuildShot; BuildShot.run()", 
+                "name": "BuildShot", 
+                "order": 1
+            }, 
+            "CreateProxy": {
+                "label": "CreateProxy", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.CreateProxy as CreateProxy; CreateProxy.run()", 
+                "name": "CreateProxy", 
+                "order": 5
+            }, 
+            "LoadPreviousVersion": {
+                "label": "LoadPreviousVersion", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.LoadPreviousVersion as LoadPreviousVersion; LoadPreviousVersion.run()", 
+                "name": "LoadPreviousVersion", 
+                "order": 13
+            }, 
+            "PublishCurrentFile": {
+                "label": "PublishCurrentFile", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.PublishCurrentFile as PublishCurrentFile; PublishCurrentFile.run()", 
+                "name": "PublishCurrentFile", 
+                "order": 10
+            }, 
+            "RefreshProxyPath": {
+                "label": "RefreshProxyPath", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.RefreshProxyPath as RefreshProxyPath; RefreshProxyPath.run()", 
+                "name": "RefreshProxyPath", 
+                "order": 12
+            }, 
+            "RenderSelected": {
+                "label": "Render Selected", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.RenderSelected as RenderSelected; RenderSelected.run()", 
+                "name": "RenderSelected", 
+                "order": 4
+            }, 
+            "ReplacePaths": {
+                "label": "ReplacePaths", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.ReplacePaths as ReplacePaths; ReplacePaths.run()", 
+                "name": "ReplacePaths", 
+                "order": 11
+            }, 
+            "RequestReview": {
+                "label": "Review Selected", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.RequestReview as RequestReview; RequestReview.run()", 
+                "name": "RequestReview", 
+                "order": 9
+            }, 
+            "UpdateSeqShotPath": {
+                "label": "UpdateSeqShotPath", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.UpdateSeqShotPath as UpdateSeqShotPath; UpdateSeqShotPath.run()", 
+                "name": "UpdateSeqShotPath", 
+                "order": 8
+            }, 
+            "VersionUpSelected": {
+                "label": "Version Up Selected", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.VersionUpSelected as VersionUpSelected; VersionUpSelected.run()", 
+                "name": "VersionUpSelected", 
+                "order": 7
+            }, 
+            "open": {
+                "label": "open", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.open as open; open.run()", 
+                "name": "open", 
+                "order": 3
+            }, 
+            "order": 1, 
+            "version_up": {
+                "label": "Version Up Comp", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.version_up as version_up; version_up.run()", 
+                "name": "version_up", 
+                "order": 6
+            }, 
+            "write_node": {
+                "label": "Write Node", 
+                "module": "import cgl_tools.nuke.menus.Lumbermill.write_node as write_node; write_node.run()", 
+                "name": "write_node", 
+                "order": 2
+            }
+        }, 
+        "homeCoconut": {
+            "ExportShotToFolder": {
+                "label": "ExportShotToFolder", 
+                "module": "import cgl_tools.nuke.menus.homeCoconut.ExportShotToFolder as ExportShotToFolder; ExportShotToFolder.run()", 
+                "name": "ExportShotToFolder", 
+                "order": 1
+            }, 
+            "order": 3
+        }, 
+        "shotSetup": {
+            "SetCompSize": {
+                "label": "SetCompSize", 
+                "module": "import cgl_tools.nuke.menus.shotSetup.SetCompSize as SetCompSize; SetCompSize.run()", 
+                "name": "SetCompSize", 
+                "order": 2
+            }, 
+            "SetLut": {
+                "label": "SetLut", 
+                "module": "import cgl_tools.nuke.menus.shotSetup.SetLut as SetLut; SetLut.run()", 
+                "name": "SetLut", 
+                "order": 1
+            }, 
+            "order": 4
+        }
+    }
+}

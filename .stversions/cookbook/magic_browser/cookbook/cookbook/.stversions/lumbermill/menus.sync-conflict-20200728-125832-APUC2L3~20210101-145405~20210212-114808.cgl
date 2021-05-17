@@ -1,0 +1,19 @@
+{
+    "lumbermill": {
+        "File": {
+            "CorrectFileName": {
+                "label": "CorrectFileName", 
+                "module": "import cgl_tools.lumbermill.menus.File.CorrectFileName as CorrectFileName; CorrectFileName.run()", 
+                "name": "CorrectFileName", 
+                "order": 1
+            }, 
+            "OpenPreview": {
+                "label": "OpenPreview", 
+                "module": "import cgl_tools.lumbermill.menus.File.OpenPreview as OpenPreview; OpenPreview.run()", 
+                "name": "OpenPreview", 
+                "order": 2
+            }, 
+            "order": 1
+        }
+    }
+}

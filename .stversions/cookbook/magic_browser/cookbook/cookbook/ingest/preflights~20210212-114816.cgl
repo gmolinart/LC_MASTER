@@ -1,0 +1,63 @@
+{
+    "ingest": [
+        {
+            "buttons": [
+                {
+                    "label": "Publish From Ingest Tool",
+                    "module": "cgl_tools.ingest.preflights.default.PublishFromIngestDataFrame",
+                    "name": "PublishFromIngestDataFrame",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "MarkAsPublished",
+                    "module": "cgl_tools.ingest.preflights.default.MarkAsPublished",
+                    "name": "MarkAsPublished",
+                    "order": 2,
+                    "required": "True"
+                }
+            ],
+            "name": "default"
+        },
+        {
+            "buttons": [
+                {
+                    "label": "PublishPlate",
+                    "module": "cgl_tools.ingest.preflights.plate.PublishPlate",
+                    "name": "PublishPlate",
+                    "order": 1,
+                    "required": "True"
+                },
+                {
+                    "label": "CreateExrProxy",
+                    "module": "cgl_tools.ingest.preflights.plate.CreateExrProxy",
+                    "name": "CreateExrProxy",
+                    "order": 2,
+                    "required": "True"
+                },
+                {
+                    "label": "CreateHdMovie",
+                    "module": "cgl_tools.ingest.preflights.plate.CreateHdMovie",
+                    "name": "CreateHdMovie",
+                    "order": 3,
+                    "required": "True"
+                },
+                {
+                    "label": "SendToFtrack",
+                    "module": "cgl_tools.ingest.preflights.plate.SendToFtrack",
+                    "name": "SendToFtrack",
+                    "order": 4,
+                    "required": "True"
+                },
+                {
+                    "label": "MarkAsPublished",
+                    "module": "cgl_tools.ingest.preflights.plate.MarkAsPublished",
+                    "name": "MarkAsPublished",
+                    "order": 5,
+                    "required": "True"
+                }
+            ],
+            "name": "plate"
+        }
+    ]
+}

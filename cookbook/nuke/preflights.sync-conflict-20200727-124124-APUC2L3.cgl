@@ -1,0 +1,70 @@
+{
+    "nuke": {
+        "render": {
+            "CheckWriteNode": {
+                "label": "Check Write Node", 
+                "module": "cgl_tools.nuke.preflights.render.CheckWriteNode", 
+                "name": "CheckWriteNode", 
+                "order": 1, 
+                "required": "True"
+            }, 
+            "CheckWriteVersions": {
+                "label": "CheckWriteVersions", 
+                "module": "cgl_tools.nuke.preflights.render.CheckWriteVersions", 
+                "name": "CheckWriteVersions", 
+                "order": 2, 
+                "required": "True"
+            }, 
+            "ClosePreflight": {
+                "label": "Close Preflight", 
+                "module": "cgl_tools.nuke.preflights.render.ClosePreflight", 
+                "name": "ClosePreflight", 
+                "order": 9, 
+                "required": "True"
+            }, 
+            "CreateMOV": {
+                "label": "Create MOV", 
+                "module": "cgl_tools.nuke.preflights.render.CreateMOV", 
+                "name": "CreateMOV", 
+                "order": 7, 
+                "required": "True"
+            }, 
+            "CreateThumbnail": {
+                "label": "CreateThumbnail", 
+                "module": "cgl_tools.nuke.preflights.render.CreateThumbnail", 
+                "name": "CreateThumbnail", 
+                "order": 8, 
+                "required": "True"
+            }, 
+            "MakeProxy": {
+                "label": "MakeProxy", 
+                "module": "cgl_tools.nuke.preflights.render.MakeProxy", 
+                "name": "MakeProxy", 
+                "order": 6, 
+                "required": "True"
+            }, 
+            "RenderSelectedNode": {
+                "label": "RenderSelectedNode", 
+                "module": "cgl_tools.nuke.preflights.render.RenderSelectedNode", 
+                "name": "RenderSelectedNode", 
+                "order": 5, 
+                "required": "True"
+            }, 
+            "SaveScene": {
+                "label": "SaveScene", 
+                "module": "cgl_tools.nuke.preflights.render.SaveScene", 
+                "name": "SaveScene", 
+                "order": 4, 
+                "required": "True"
+            }, 
+            "TurnOffProxy": {
+                "label": "TurnOffProxy", 
+                "module": "cgl_tools.nuke.preflights.render.TurnOffProxy", 
+                "name": "TurnOffProxy", 
+                "order": 3, 
+                "required": "True"
+            }, 
+            "order": 1
+        }
+    }
+}
